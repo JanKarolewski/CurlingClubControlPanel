@@ -1,0 +1,4 @@
+django-bootstrap-v5
+django_bootstrap_icons
+pip install "django-phonenumber-field[phonenumberslite]"
+pip3 install djangorestframework
