@@ -1,0 +1,10 @@
+{% extends 'events/base.html' %}
+{% block content %}
+
+
+<center>
+    <h4>{{ post.title }}</h4>
+    <small>By:{{ post.author }}</small> <br>
+    {{ post.body }}
+</center>
+{% endblock %}

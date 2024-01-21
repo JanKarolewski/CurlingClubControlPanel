@@ -1,0 +1,27 @@
+{% extends 'events/base.html' %}
+
+{% block content %}
+    <h4>Miesiac: </h4>
+
+    {{ month }} <br/>
+
+    {{ year }} <br/>
+
+    Miesiac w roku:  <br/>
+
+    {{ month_number }} <br/>
+
+    DATA :
+
+    {{ current_year }} <br/>
+
+    <br/>
+    CZAS:
+    {{ time }}
+    <br/>
+    <!--User: -->
+    <!--{{ request.user.username }} <br/>-->
+
+    <center>{{ cal|safe }}</center>
+
+{% endblock %}
