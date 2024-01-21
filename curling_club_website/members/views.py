@@ -1,10 +1,12 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 
-from members.forms import RegisterUserForm, RegisterClubForm
+from members.forms import RegisterUserForm, RegisterClubForm, ProfileForm
+from members.models import Profile
 
 
 def login_user(request):
@@ -37,9 +39,7 @@ def register_user(request):
             form.save()
             password = form.cleaned_data['password1']
             username = form.cleaned_data['username']
-            user = authenticate(username=username, password=password,
-                                # last_name=last_name, phone_number=phone_number
-                                )
+            user = authenticate(username=username, password=password)
             login(request, user)
             messages.success(request, "Poprawna rejestracja")
             return redirect('home')
@@ -73,3 +73,37 @@ def register_club(request):
 def profile_panel(request):
     print("nowe gówno")
     return render(request, 'authenticate/profile_panel.html')
+
+
+@login_required
+def update_user(request):
+    if request.user.is_authenticated:
+        user_data = User.objects.get(id=request.user.id)
+        form = RegisterUserForm(request.POST or None, instance=user_data)
+        if form.is_valid():
+            form.save()
+            login(request, user_data)
+            messages.success(request, "Zaktualizowano dane")
+            return redirect('home')
+        return render(request, 'authenticate/update_user.html', {'form': form})
+    else:
+        messages.error(request, "Musisz być zalogowanym")
+        return redirect('home')
+
+
+@login_required
+def update_profile(request):
+    if request.user.is_authenticated:
+        user_data = User.objects.get(id=request.user.id)
+        profile_data = Profile.objects.get(user=user_data)
+        form = ProfileForm(request.POST or None, instance=profile_data)
+
+        if form.is_valid():
+            form.save()
+            login(request, user_data)
+            messages.success(request, "Zaktualizowano dane")
+            return redirect('home')
+        return render(request, 'authenticate/update_profile.html', {'form': form})
+    else:
+        messages.error(request, "Musisz być zalogowanym")
+        return redirect('home')

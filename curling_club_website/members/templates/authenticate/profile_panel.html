@@ -5,6 +5,22 @@
  <h4>Profile Panel</h4>
 <br/><br/><br/>
 
+Dla Usera
+<ul>
+  <li>Username: {{ user.username }}</li>
+  <li>Full Name: {{ user.get_full_name }}</li>
+</ul>
+<a href="{% url 'update-user' %}">
+    <button class="btn btn-primary" type="button">Update User</button>
+</a>
+
+<ul>
+Dla Profilu
+<li>Club: {{ user.profile.club_id|default:"Brak" }}</li>
+</ul>
+<a href="{% url 'update-profile' %}">
+    <button class="btn btn-primary" type="button">Update Profile</button>
+</a>
 <div class="card" style="width: 18rem;">
   <img src="{{ user.photo_profile.url }}" class="card-img-top">
   <div class="card-body">

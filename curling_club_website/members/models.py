@@ -22,15 +22,11 @@ class Club(models.Model):
         return self.short_name
 
 
-class UserApp(models.Model):
+class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     phone_number = PhoneNumberField(null=True, blank=True)
     club_id = models.ForeignKey(Club, null=True, blank=True, on_delete=models.CASCADE)
     photo_profile = models.ImageField(blank=True, null=True, upload_to='user_photo_profile/', default='uploads/OIP.jpg')
-
-    class Meta:
-        managed = False
-        db_table = 'userapp'
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
@@ -41,3 +37,6 @@ class UserApp(models.Model):
     @receiver(post_save, sender=User)
     def save_user_profile(sender, instance, **kwargs):
         instance.profile.save()
+
+    def __str__(self):
+        return str(self.user.username) + " | " + str(self.club_id)

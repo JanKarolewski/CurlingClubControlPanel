@@ -1,0 +1,14 @@
+{% extends 'events/base.html' %}
+{% block content %}
+
+
+ <h4>Update Profile</h4>
+<br/><br/><br/>
+
+	<form action="{% url 'update-profile' %}" method=POST>
+		{% csrf_token %}
+			{{ form }}
+
+		<br><button type="submit" value="Submit" class="btn btn-secondary">Zaktualizuj dane dla Profilu</button>
+	</form>
+{% endblock %}
