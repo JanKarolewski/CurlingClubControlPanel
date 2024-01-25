@@ -1,5 +1,5 @@
 from django.db import models
-from members.models import Profile
+from members.models import Profile, Club
 
 
 class Venue(models.Model):
@@ -21,6 +21,8 @@ class Event(models.Model):
     manager = models.ForeignKey(Profile, blank=True, null=True, on_delete=models.SET_NULL, related_name='manager')
     description = models.TextField(blank=True)
     attendees = models.ManyToManyField(Profile, blank=True, related_name='attendees')
+    host_club = models.ForeignKey(Club, blank=True, null=True, on_delete=models.CASCADE, related_name='host_club')
+
 
     def __str__(self):
         return self.name

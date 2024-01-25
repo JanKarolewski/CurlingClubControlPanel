@@ -14,6 +14,7 @@ class Club(models.Model):
     istagram_page = models.URLField(max_length=255, null=True, blank=True)
     phone_number = phone_number = PhoneNumberField()
     main_photo = models.ImageField(blank=True, null=True, upload_to='clubs_main_photo/', default='uploads/OIP.jpg')
+    club_admin = models.OneToOneField(User, on_delete=models.CASCADE, default=None)
 
     # Todo create Adress model and add it to forms
     # adress = Adress()

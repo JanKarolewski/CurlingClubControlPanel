@@ -6,7 +6,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 
 from members.forms import RegisterUserForm, RegisterClubForm, ProfileForm
-from members.models import Profile
+from members.models import Profile, Club
 
 
 def login_user(request):
@@ -57,7 +57,9 @@ def register_club(request):
     if request.method == 'POST':
         form = RegisterClubForm(request.POST)
         if form.is_valid():
-            form.save()
+            club = form.save(commit=False)
+            club.club_admin = request.user
+            club = club.save()
             messages.success(request, "Poprawna rejestracja klubu")
             return redirect('home')
         else:
@@ -107,3 +109,16 @@ def update_profile(request):
     else:
         messages.error(request, "Musisz być zalogowanym")
         return redirect('home')
+
+
+def club_info_panel(request, club_id):
+    print(club_id)
+    club = Club.objects.filter(id=club_id).first()
+    print((club))
+    print((club.phone_number))
+    if club:
+        return render(request, 'club/club_info_panel.html', {'club': club})
+    else:
+        all_clubs = Club.objects.all()
+        print(all_clubs)
+        return render(request, 'club/clubs_all_list.html', {'all_clubs': all_clubs})

@@ -33,7 +33,8 @@ class RegisterUserForm(UserCreationForm):
 class RegisterClubForm(ModelForm):
     class Meta:
         model = Club
-        fields = "__all__"
+        fields = ('name', 'short_name', 'team_short_name', 'web_page', 'facebook_page', 'istagram_page',
+                  'phone_number', 'main_photo')
 
     def __init__(self, *args, **kwargs):
         super(RegisterClubForm, self).__init__(*args, **kwargs)

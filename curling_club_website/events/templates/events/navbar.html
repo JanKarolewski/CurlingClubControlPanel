@@ -5,8 +5,8 @@
 
     {{ user }}
     {{ user.club_id }}
-    {% if user.club %}
-      <a class="navbar-brand" href="{% url 'home' %}">MÓJ KLUB</a>
+    {% if user.profile.club_id %}
+      <a class="navbar-brand" href="{% url 'home' %}">{{ user.profile.club_id }}</a>
     {% else %}
       <a class="navbar-brand" href="{% url 'home' %}">Navbar</a>
     {% endif %}
@@ -25,12 +25,6 @@
           <a class="nav-link" href="{% url 'add-venue' %}">Add venue</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'login' %}">Login</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link" href="{% url 'register-user' %}">Reqister User</a>
         </li>
         <li class="nav-item">
@@ -43,9 +37,18 @@
         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
         <button class="btn btn-outline-success" type="submit">Search</button>
 
+        {% if user.is_authenticated %}
         <a href="{% url 'profile-panel' %}">
-            <button class="btn btn-primary" type="button">{% bs_icon 'person-circle' %}</button>
+          <button class="btn btn-primary" type="button">{% bs_icon 'person-circle' %}</button>
         </a>
+        <a href="{% url 'logout' %}">
+          <button class="btn btn-secondary" type="button">Logout</button>
+        </a>
+        {% else %}
+        <a href="{% url 'login' %}">
+          <button class="btn btn-secondary" type="button">Login</button>
+        </a>
+        {% endif %}
 
       </form>
     </div>
