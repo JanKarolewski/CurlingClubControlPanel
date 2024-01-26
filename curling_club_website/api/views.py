@@ -1,9 +1,11 @@
 from django.shortcuts import render
+from django.views import View
 from rest_framework import generics, permissions, viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from . serializers import VenueSerializer
+from members.models import Club
+from .serializers import VenueSerializer, ClubSerializer
 from events.models import Venue
 
 
@@ -32,3 +34,12 @@ def check(request):
     queryset = Venue.objects.all()
     print(queryset)
     return render(request, 'api/check.html', {})
+
+
+class ClubViewSet(viewsets.ModelViewSet):
+    queryset = Club.objects.all()
+    serializer_class = ClubSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
+    # filter_backends = DEFAULT_FILTER_BACKENDS
+

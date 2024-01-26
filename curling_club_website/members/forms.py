@@ -14,7 +14,7 @@ class RegisterUserForm(UserCreationForm):
     username = forms.CharField(max_length=50)
     email = forms.EmailField(widget=forms.EmailInput())
 
-    # club_id = forms.ModelChoiceField(queryset=Club.objects.all(), empty_label="wybierz klub")
+    # club = forms.ModelChoiceField(queryset=Club.objects.all(), empty_label="wybierz klub")
 
     class Meta:
         model = User
@@ -49,14 +49,14 @@ class RegisterClubForm(ModelForm):
 
 
 class ProfileForm(ModelForm):
-    club_id = forms.ModelChoiceField(queryset=Club.objects.all(), empty_label="wybierz klub")
+    club = forms.ModelChoiceField(queryset=Club.objects.all(), empty_label="wybierz klub")
     phone_number = PhoneNumberField()
 
     class Meta:
         model = Profile
-        fields = ('club_id', 'phone_number')
+        fields = ('club', 'phone_number')
 
     def __init__(self, *args, **kwargs):
         super(ProfileForm, self).__init__(*args, **kwargs)
-        self.fields['club_id'].widget.attrs['class'] = 'form-control'
+        self.fields['club'].widget.attrs['class'] = 'form-control'
         self.fields['phone_number'].widget.attrs['class'] = 'form-control'

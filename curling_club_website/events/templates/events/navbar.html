@@ -4,9 +4,8 @@
   <div class="container-fluid">
 
     {{ user }}
-    {{ user.club_id }}
-    {% if user.profile.club_id %}
-      <a class="navbar-brand" href="{% url 'home' %}">{{ user.profile.club_id }}</a>
+    {% if user.profile.club %}
+      <a class="navbar-brand" href="{% url 'home' %}">{{ user.profile.club }}</a>
     {% else %}
       <a class="navbar-brand" href="{% url 'home' %}">Navbar</a>
     {% endif %}
@@ -41,6 +40,11 @@
         <a href="{% url 'profile-panel' %}">
           <button class="btn btn-primary" type="button">{% bs_icon 'person-circle' %}</button>
         </a>
+        {% if user.profile.club.id %}
+          <a href="{% url 'club-admin-panel' pk=user.profile.club.id %}">
+            <button class="btn btn-info" type="button">Club</button>
+          </a>
+        {% endif%}
         <a href="{% url 'logout' %}">
           <button class="btn btn-secondary" type="button">Logout</button>
         </a>

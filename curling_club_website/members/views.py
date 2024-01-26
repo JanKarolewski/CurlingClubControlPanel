@@ -1,9 +1,17 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+from django.db import IntegrityError
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from django.views import View
+from django.views.generic import ListView, DetailView
+from django.urls import reverse_lazy
+from django.views.generic.detail import SingleObjectMixin
+from rest_framework.permissions import IsAuthenticated
 
 from members.forms import RegisterUserForm, RegisterClubForm, ProfileForm
 from members.models import Profile, Club
@@ -59,9 +67,13 @@ def register_club(request):
         if form.is_valid():
             club = form.save(commit=False)
             club.club_admin = request.user
-            club = club.save()
-            messages.success(request, "Poprawna rejestracja klubu")
-            return redirect('home')
+            try:
+                club = club.save()
+                messages.success(request, "Poprawna rejestracja klubu")
+                return redirect('home')
+            except IntegrityError:
+                messages.error(request, "Brak możliwości rejestracji klubu")
+
         else:
             messages.error(request, "Błędna rejestracja klubu")
     else:
@@ -73,7 +85,6 @@ def register_club(request):
 
 @login_required
 def profile_panel(request):
-    print("nowe gówno")
     return render(request, 'authenticate/profile_panel.html')
 
 
@@ -111,14 +122,73 @@ def update_profile(request):
         return redirect('home')
 
 
-def club_info_panel(request, club_id):
-    print(club_id)
-    club = Club.objects.filter(id=club_id).first()
-    print((club))
-    print((club.phone_number))
+def club_info_panel(request, club):
+    club = Club.objects.filter(id=club).first()
     if club:
         return render(request, 'club/club_info_panel.html', {'club': club})
     else:
         all_clubs = Club.objects.all()
-        print(all_clubs)
         return render(request, 'club/clubs_all_list.html', {'all_clubs': all_clubs})
+
+
+class ClubView(DetailView):
+    model = Club
+    context_object_name = 'club'
+    template_name = 'club/administration/club_basic_admin_panel.html'
+
+    #ToDo
+    # permission_required = '(only_user_in_admin_club_group, only_my_club, only_login)' PermissionRequiredMixin
+
+    # def get_context_data(self, *args, **kwargs):
+    #     if self.kwargs['pk'] != self.request.user.profile.club.id:
+    #         print("dupa")
+    #     context = super(ClubView, self).get_context_data(*args, **kwargs)
+    #     club_test = get_object_or_404(Club, id=self.kwargs['pk'])
+    #     context["club_test"] = club_test
+    #     return context
+
+    def get_object(self, *args, **kwargs):
+        obj = Club.objects.get(id=self.request.user.profile.club.id)
+        print(obj)
+        return obj
+
+
+class MembersClubView(ListView):
+    model = Profile
+    context_object_name = 'members_list'
+    template_name = 'club/administration/club_members_list.html'
+
+    def get_queryset(self):
+        club_id = self.request.user.profile.club.id
+        qs_club_member = super().get_queryset().filter(club=club_id)
+        return qs_club_member
+
+    def post(self, *args, **kwargs):
+        print("kurwo zadziałaj")
+        print(self.request.GET)
+        return redirect('club-members-panel')
+
+    def test(self):
+        print("kurwo zadziałaj")
+        return redirect('club-members-panel')
+
+    # def dispatch(self, request, *args, **kwargs):
+    #     if request.method == 'DELETE':
+    #         print("delete")
+    #         return HttpResponse("AAA")
+            # return redirect('club-members-panel')
+
+class ClubViewv2(View):
+    model = Club
+
+    def get(self, request, *args, **kwargs):
+        test = request.GET.get('test')
+        club = request.user.profile.club.id
+        club_info = Club.objects.get(pk=club)
+
+        return render(request, 'club/administration/club_basic_admin_panel.html', {
+            'club_info': club_info
+        })
+
+    def post(self, request):
+        return render(request, 'club/administration/club_basic_admin_panel.html', {})

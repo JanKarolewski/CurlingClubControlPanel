@@ -1,0 +1,45 @@
+{% extends 'events/base.html' %}
+{% load bootstrap_icons %}
+{% block content %}
+
+
+<h4> {{ user.profile.club }} Members Panel</h4>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Last Name</th>
+        <th scope="col">Email</th>
+        <th scope="col">Phone Number</th>
+        <th scope="col">Possible actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for member in members_list %}
+    <tr>
+        <th scope="row">{{ forloop.counter }} {{member.user.club}}</th>
+        <td>{{ member.user.first_name }}</td>
+        <td>{{ member.user.last_name }}</td>
+        <td>{{ member.user.email_address|default:'--' }}</td>
+        <td>{{ member.user.profile.phone_number|default:'--' }}</td>
+        <td>
+            {% if member.user.profile.club_profile_status == "New club member" %}
+            <a href="{% url 'club-members-panel' %}">
+                <form method="POST" action="{% url 'club-members-panel' %}?id={{  member.user.id }}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-success">{% bs_icon 'check-circle' %}</button>
+                </form>
+                <form method="POST" action="{% url 'club-members-panel' %}?id={{  member.user.id }}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-success">{% bs_icon 'check-circle' %}</button>
+                </form>
+            </a>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

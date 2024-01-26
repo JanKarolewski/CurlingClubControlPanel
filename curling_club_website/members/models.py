@@ -14,7 +14,8 @@ class Club(models.Model):
     istagram_page = models.URLField(max_length=255, null=True, blank=True)
     phone_number = phone_number = PhoneNumberField()
     main_photo = models.ImageField(blank=True, null=True, upload_to='clubs_main_photo/', default='uploads/OIP.jpg')
-    club_admin = models.OneToOneField(User, on_delete=models.CASCADE, default=None)
+    club_admin = models.OneToOneField(User, on_delete=models.PROTECT, default=None)
+    club_members = models.ManyToManyField(User, blank=True, null=True, related_name='club_members')
 
     # Todo create Adress model and add it to forms
     # adress = Adress()
@@ -24,10 +25,19 @@ class Club(models.Model):
 
 
 class Profile(models.Model):
+    profile_status_choices = [
+        ("New user", "New user"),
+        ("New club member", "New club member"),
+        ("Profile change", "Profile change"),
+        ("Confirmed profile", "Confirmed profile"),
+        ("Profile rejected", "Profile rejected")
+    ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     phone_number = PhoneNumberField(null=True, blank=True)
-    club_id = models.ForeignKey(Club, null=True, blank=True, on_delete=models.CASCADE)
+    club = models.ForeignKey(Club, null=True, blank=True, on_delete=models.CASCADE)
     photo_profile = models.ImageField(blank=True, null=True, upload_to='user_photo_profile/', default='uploads/OIP.jpg')
+    club_profile_status = models.CharField(choices=profile_status_choices, blank=True, null=True, default="New user",
+                                           max_length=100)
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
@@ -40,4 +50,4 @@ class Profile(models.Model):
         instance.profile.save()
 
     def __str__(self):
-        return str(self.user.username) + " | " + str(self.club_id)
+        return str(self.user.username) + " | " + str(self.club)

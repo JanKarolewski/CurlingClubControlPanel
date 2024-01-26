@@ -16,7 +16,7 @@ Dla Usera
 
 <ul>
 Dla Profilu
-    <li>Club: <a href="{% url 'club-info-panel' club_id=user.profile.club_id.id %}"> {{ user.profile.club_id|default:"Brak" }} </a></li>
+    <li>Club: <a href="{% url 'club-info-panel' club=user.profile.club.id %}"> {{ user.profile.club|default:"Brak" }} </a></li>
 </ul>
 <a href="{% url 'update-profile' %}">
     <button class="btn btn-primary" type="button">Update Profile</button>
