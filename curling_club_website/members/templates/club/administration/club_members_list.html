@@ -3,7 +3,7 @@
 {% block content %}
 
 
-<h4> {{ user.profile.club }} Members Panel</h4>
+<h4> {{ user.profile.club }} Members Panel For Users</h4>
 
 <table class="table table-striped">
     <thead>
@@ -19,23 +19,28 @@
     <tbody>
     {% for member in members_list %}
     <tr>
-        <th scope="row">{{ forloop.counter }} {{member.user.club}}</th>
+        <th scope="row">{{ forloop.counter }}</th>
         <td>{{ member.user.first_name }}</td>
         <td>{{ member.user.last_name }}</td>
         <td>{{ member.user.email_address|default:'--' }}</td>
         <td>{{ member.user.profile.phone_number|default:'--' }}</td>
         <td>
-            {% if member.user.profile.club_profile_status == "New club member" %}
-            <a href="{% url 'club-members-panel' %}">
-                <form method="POST" action="{% url 'club-members-panel' %}?id={{  member.user.id }}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-success">{% bs_icon 'check-circle' %}</button>
-                </form>
-                <form method="POST" action="{% url 'club-members-panel' %}?id={{  member.user.id }}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-success">{% bs_icon 'check-circle' %}</button>
-                </form>
-            </a>
+            {% if member.user.profile.club_profile_status == "User_sent_join_request" %}
+                <span>
+                    <form style="display:inline-block;" method="POST" action="{% url 'club-members-panel' %}?id={{  member.user.id }}">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Confirm user request to join at Club">{% bs_icon 'person-check-fill' %}</button>
+                    </form>
+                </span>
+                <span>
+                    <form style="display:inline-block;" method="POST" action="{% url 'club-members-panel' %}?id={{  member.user.id }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="_method" value="delete">
+                        <button type="submit" class="btn btn-outline-danger" value="delete" data-toggle="tooltip" data-placement="top" title="Reject user request to join to Club">
+                            {% bs_icon 'person-fill-slash' %}
+                        </button>
+                    </form>
+                </span>
             {% endif %}
         </td>
     </tr>

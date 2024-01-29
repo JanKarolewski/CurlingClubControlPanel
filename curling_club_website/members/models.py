@@ -26,18 +26,18 @@ class Club(models.Model):
 
 class Profile(models.Model):
     profile_status_choices = [
-        ("New user", "New user"),
-        ("New club member", "New club member"),
-        ("Profile change", "Profile change"),
-        ("Confirmed profile", "Confirmed profile"),
-        ("Profile rejected", "Profile rejected")
+        ("No_club_member", "No club member"), # to jest bez sensu, wystarczy że poleclub będzie None
+        ("User_sent_join_request", "User sent join request to Club"),
+        ("Profile_change", "Profile change"),
+        ("Confirmed_profile", "Confirmed profile"),
+        ("Profile_rejected", "Profile rejected")
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     phone_number = PhoneNumberField(null=True, blank=True)
     club = models.ForeignKey(Club, null=True, blank=True, on_delete=models.CASCADE)
     photo_profile = models.ImageField(blank=True, null=True, upload_to='user_photo_profile/', default='uploads/OIP.jpg')
-    club_profile_status = models.CharField(choices=profile_status_choices, blank=True, null=True, default="New user",
-                                           max_length=100)
+    club_profile_status = models.CharField(choices=profile_status_choices, blank=True, null=True,
+                                           default="No_club_member", max_length=100)
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):

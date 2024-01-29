@@ -67,8 +67,10 @@ def register_club(request):
         if form.is_valid():
             club = form.save(commit=False)
             club.club_admin = request.user
+            profile = Profile.objects.get(user=request.user)
             try:
-                club = club.save()
+                profile.club = form.instance
+                profile.save()
                 messages.success(request, "Poprawna rejestracja klubu")
                 return redirect('home')
             except IntegrityError:
@@ -157,26 +159,47 @@ class MembersClubView(ListView):
     model = Profile
     context_object_name = 'members_list'
     template_name = 'club/administration/club_members_list.html'
+    club_id = None
+    club_member = None
 
     def get_queryset(self):
-        club_id = self.request.user.profile.club.id
-        qs_club_member = super().get_queryset().filter(club=club_id)
+        qs_club_member = super().get_queryset().filter(club=self.club_id)
+        print(qs_club_member)
         return qs_club_member
 
+    def dispatch(self, *args, **kwargs):
+        method = self.request.POST.get('_method', '').lower()
+        self.club_id = self.request.user.profile.club.id
+        self.club_member = self.request.GET.get('id', False)
+        if method == 'put':
+            # return self.put(*args, **kwargs)
+            return self.post(*args, **kwargs)
+        if method == 'delete':
+            return self.delete(*args, **kwargs)
+        return super(MembersClubView, self).dispatch(*args, **kwargs)
+
     def post(self, *args, **kwargs):
-        print("kurwo zadziałaj")
+        # confirm user request to join at CLub
+        print("confirm user request to join at CLub")
         print(self.request.GET)
+        print(self.club_id)
+        print(self.club_member)
+        profile = Profile.objects.get(pk=self.club_member, club=self.club_id)
+        profile.club_profile_status = "Profile_change"
+        profile.save()
         return redirect('club-members-panel')
 
-    def test(self):
-        print("kurwo zadziałaj")
+    def delete(self, *args, **kwargs):
+        # reject user request to join to Club
+        print("reject user request to join to Club")
+        print(self.request.GET)
+        print(self.club_id)
+        profile = Profile.objects.get(pk=self.club_member, club=self.club_id)
+        profile.club_profile_status = "No_club_member"
+        profile.club = None
+        profile.save()
         return redirect('club-members-panel')
 
-    # def dispatch(self, request, *args, **kwargs):
-    #     if request.method == 'DELETE':
-    #         print("delete")
-    #         return HttpResponse("AAA")
-            # return redirect('club-members-panel')
 
 class ClubViewv2(View):
     model = Club
