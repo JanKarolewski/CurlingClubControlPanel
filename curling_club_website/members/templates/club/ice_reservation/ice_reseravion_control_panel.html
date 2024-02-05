@@ -1,0 +1,40 @@
+{% extends 'events/base.html' %}
+{% block content %}
+
+
+<h4>Ice availability</h4>
+<br/>
+
+<a href="{% url 'club-ice-availability-schedule' %}">
+    <button type="button" class="btn btn-primary ">Add availability schedule</button>
+</a>
+
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th scope="col">Day</th>
+        <th scope="col">Open From</th>
+        <th scope="col">Open To</th>
+        <th scope="col">Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for day in club_ice_schedule %}
+    <tr>
+        <th scope="row">{{ day.day_week_name }}</th>
+        <td>{{ day.from_hour|time:'H:i' }}</td>
+        <td>{{ day.to_hour|time:'H:i' }}</td>
+        <td>
+            <a href="{% url 'edit-ice-availability-schedule' day_name=day.day_week_number %}">
+                <button class="btn btn-primary" type="button">Edit</button>
+            </a>
+            <a href="{% url 'delete-ice-availability-schedule' day_name=day.day_week_number %}">
+                <button class="btn btn-danger" type="button">Delete</button>
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

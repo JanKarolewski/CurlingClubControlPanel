@@ -1,8 +1,9 @@
-from phonenumber_field.modelfields import PhoneNumberField
 from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.translation import gettext as _
 
 
 class Club(models.Model):
@@ -51,3 +52,40 @@ class Profile(models.Model):
 
     def __str__(self):
         return str(self.user.username) + " | " + str(self.club)
+
+
+class ClubIceOpenHours(models.Model):
+    WEEKDAYS = [
+        (1, _("Monday")),
+        (2, _("Tuesday")),
+        (3, _("Wednesday")),
+        (4, _("Thursday")),
+        (5, _("Friday")),
+        (6, _("Saturday")),
+        (7, _("Sunday")),
+    ]
+
+    club = models.ForeignKey(Club, blank=True, null=True, on_delete=models.CASCADE, related_name='club')
+    weekday = models.IntegerField(choices=WEEKDAYS, unique=True)
+    from_hour = models.TimeField()
+    to_hour = models.TimeField()
+
+    class Meta:
+        verbose_name_plural = "Club Ice Open Hours"
+        ordering = ('weekday', 'from_hour')
+        unique_together = ('weekday', 'from_hour', 'to_hour')
+
+    def __unicode__(self):
+        return u'%s: %s - %s' % (self.get_weekday_display(),
+                                 self.from_hour, self.to_hour)
+
+    def __str__(self):
+        return str(self.WEEKDAYS[self.weekday-1][1]) + " | " + str(self.club)
+
+    @property
+    def day_week_name(self):
+        return str(self.WEEKDAYS[self.weekday-1][1])
+
+    @property
+    def day_week_number(self):
+        return int(self.WEEKDAYS[self.weekday - 1][0])

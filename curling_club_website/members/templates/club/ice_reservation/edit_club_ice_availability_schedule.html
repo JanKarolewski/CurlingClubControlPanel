@@ -1,0 +1,12 @@
+{% extends 'events/base.html' %}
+{% block content %}
+
+
+<h4>Update Ice Schedule</h4>
+<br/><br/><br/>
+    <form action="{% url 'edit-ice-availability-schedule' day_name=day_name %}" method=POST>
+		{% csrf_token %}
+			{{ form }}
+        <input type="submit" value="Update" class="btn btn-secondary">
+	</form>
+{% endblock %}

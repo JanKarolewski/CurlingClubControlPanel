@@ -2,13 +2,11 @@
 {% block content %}
 
 
- <h4>Register Club</h4>
+<h4>Register Club</h4>
 <br/><br/><br/>
-
-	<form action="{% url 'register-club' %}" method=POST>
-		{% csrf_token %}
-			{{ form }}
-
-        <br><input type="submit" value="Submit" class="btn btn-secondary">
-	</form>
+<form action="{% url 'register-club' %}" method=POST>
+    {% csrf_token %}
+    {{ form }}
+    <br><input type="submit" value="Submit" class="btn btn-secondary">
+</form>
 {% endblock %}

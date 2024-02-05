@@ -13,8 +13,12 @@ from django.urls import reverse_lazy
 from django.views.generic.detail import SingleObjectMixin
 from rest_framework.permissions import IsAuthenticated
 
-from members.forms import RegisterUserForm, RegisterClubForm, ProfileForm
-from members.models import Profile, Club
+import calendar
+from calendar import HTMLCalendar
+from datetime import datetime
+
+from members.forms import RegisterUserForm, RegisterClubForm, ProfileForm, ClubIceOpenHoursForm
+from members.models import Profile, Club, ClubIceOpenHours
 
 
 def login_user(request):
@@ -112,7 +116,6 @@ def update_profile(request):
         user_data = User.objects.get(id=request.user.id)
         profile_data = Profile.objects.get(user=user_data)
         form = ProfileForm(request.POST or None, instance=profile_data)
-
         if form.is_valid():
             form.save()
             login(request, user_data)
@@ -171,8 +174,7 @@ class MembersClubView(ListView):
         method = self.request.POST.get('_method', '').lower()
         self.club_id = self.request.user.profile.club.id
         self.club_member = self.request.GET.get('id', False)
-        if method == 'put':
-            # return self.put(*args, **kwargs)
+        if method == 'post':
             return self.post(*args, **kwargs)
         if method == 'delete':
             return self.delete(*args, **kwargs)
@@ -180,10 +182,6 @@ class MembersClubView(ListView):
 
     def post(self, *args, **kwargs):
         # confirm user request to join at CLub
-        print("confirm user request to join at CLub")
-        print(self.request.GET)
-        print(self.club_id)
-        print(self.club_member)
         profile = Profile.objects.get(pk=self.club_member, club=self.club_id)
         profile.club_profile_status = "Profile_change"
         profile.save()
@@ -191,9 +189,6 @@ class MembersClubView(ListView):
 
     def delete(self, *args, **kwargs):
         # reject user request to join to Club
-        print("reject user request to join to Club")
-        print(self.request.GET)
-        print(self.club_id)
         profile = Profile.objects.get(pk=self.club_member, club=self.club_id)
         profile.club_profile_status = "No_club_member"
         profile.club = None
@@ -201,17 +196,53 @@ class MembersClubView(ListView):
         return redirect('club-members-panel')
 
 
-class ClubViewv2(View):
-    model = Club
+def club_calendar_reservation_view(request):
+    club_ice_schedule = ClubIceOpenHours.objects.filter(club=request.user.profile.club)
+    return render(request,'club/ice_reservation/ice_reseravion_control_panel.html',
+                  {'club_ice_schedule': club_ice_schedule})
 
-    def get(self, request, *args, **kwargs):
-        test = request.GET.get('test')
-        club = request.user.profile.club.id
-        club_info = Club.objects.get(pk=club)
 
-        return render(request, 'club/administration/club_basic_admin_panel.html', {
-            'club_info': club_info
-        })
+def edit_ice_availability_schedule(request, day_name):
+    if request.user.is_authenticated:
+        club_ice_open_hours = ClubIceOpenHours.objects.get(club=request.user.profile.club, weekday=day_name)
+        form = ClubIceOpenHoursForm(request.POST or None, instance=club_ice_open_hours)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Zaktualizowano dane o dostępności lodu")
+            return redirect('club-calendar-reservation-view')
+        return render(request, 'club/ice_reservation/edit_club_ice_availability_schedule.html',
+                      {'form': form, 'day_name': day_name})
+    else:
+        messages.error(request, "Musisz być zalogowanym")
+        return redirect('home')
 
-    def post(self, request):
-        return render(request, 'club/administration/club_basic_admin_panel.html', {})
+
+def delete_ice_availability_schedule(request, day_name):
+    if request.user.is_authenticated:
+        club_ice_open_hours = ClubIceOpenHours.objects.get(club=request.user.profile.club, weekday=day_name)
+        print(club_ice_open_hours)
+        club_ice_open_hours.delete()
+        messages.success(request, "Wykreślono dane o dostępności lodu")
+        return redirect('club-calendar-reservation-view')
+    else:
+        messages.error(request, "Musisz być zalogowanym")
+        return redirect('home')
+
+
+def club_ice_availability_schedule(request):
+    if request.user.is_authenticated:
+        user_club = request.user.profile.club
+        form = ClubIceOpenHoursForm(request.POST or None)
+        if form.is_valid():
+            form.instance.club = user_club
+            form.save()
+            messages.success(request, "Zaktualizowano dane o dostępności lodu")
+            return redirect('club-calendar-reservation-view')
+        return render(request, 'club/ice_reservation/club_ice_availability_schedule.html', {'form': form})
+    else:
+        messages.error(request, "Musisz być zalogowanym")
+        return redirect('home')
+
+
+def create_ice_reservation_for_user(request):
+    return render(request, 'club/ice_reservation/create_ice_reservation_for_user.html')

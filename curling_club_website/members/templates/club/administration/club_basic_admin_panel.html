@@ -3,16 +3,14 @@
 
 
 <h4> {{ club }} Administration Panel</h4>
-<h4> {{ club_test }} club_test</h4>
 
 <a class="nav-link" href="{% url 'add-venue' %}">Add venue</a>
 
-<button type="button" class="btn btn-primary ">Members</button>
+<a href="{% url 'club-calendar-reservation-view' %}"><button type="button" class="btn btn-primary ">Curling Arena Reservation</button></a>
 
 <a href="{% url 'club-members-panel' %}"><button class="btn btn-info" type="button">Members</button></a>
 
 <button type="button" class="btn btn-primary">SocialMedia</button>
-
 
 
 {% endblock %}
