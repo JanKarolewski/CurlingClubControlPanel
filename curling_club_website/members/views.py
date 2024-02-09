@@ -244,5 +244,6 @@ def club_ice_availability_schedule(request):
         return redirect('home')
 
 
-def create_ice_reservation_for_user(request):
+def create_ice_reservation_for_user(request, day=datetime.now().day, month=datetime.now().month,
+                                    year=datetime.now().year):
     return render(request, 'club/ice_reservation/create_ice_reservation_for_user.html')

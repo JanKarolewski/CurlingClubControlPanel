@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path, include, re_path
 
 from api.views import ClubViewSet
 from . import views
@@ -26,7 +26,7 @@ urlpatterns = [
          name='edit-ice-availability-schedule'),
     path('delete-ice-availability-schedule/<int:day_name>', views.delete_ice_availability_schedule,
          name='delete-ice-availability-schedule'),
-    path('create-ice-reservation-for-user', views.create_ice_reservation_for_user,
-         name='create-ice-reservation-for-user'),
 
+    re_path(r'create-ice-reservation-for-user/(?:year-(?P<year>[0-9]+)/)?$',
+            views.create_ice_reservation_for_user, name='create-ice-reservation-for-user'),
 ]
