@@ -18,7 +18,7 @@ from calendar import HTMLCalendar
 from datetime import datetime
 
 from members.forms import RegisterUserForm, RegisterClubForm, ProfileForm, ClubIceOpenHoursForm
-from members.models import Profile, Club, ClubIceOpenHours
+from members.models import Profile, Club, ClubIceOpenHours, Reservation
 
 
 def login_user(request):
@@ -246,4 +246,5 @@ def club_ice_availability_schedule(request):
 
 def create_ice_reservation_for_user(request, day=datetime.now().day, month=datetime.now().month,
                                     year=datetime.now().year):
+    # /create-ice-reservation-for-user/?year:2028/month:5/
     return render(request, 'club/ice_reservation/create_ice_reservation_for_user.html')

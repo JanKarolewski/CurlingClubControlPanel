@@ -27,6 +27,9 @@ urlpatterns = [
     path('delete-ice-availability-schedule/<int:day_name>', views.delete_ice_availability_schedule,
          name='delete-ice-availability-schedule'),
 
+    # ice reservation calendar
     re_path(r'create-ice-reservation-for-user/(?:year-(?P<year>[0-9]+)/)?$',
             views.create_ice_reservation_for_user, name='create-ice-reservation-for-user'),
+    # path('all_club_ice_reservation/', views.all_club_ice_reservation, name='all_club_ice_reservation'),
+    # path('add_club_ice_reservation/', views.add_club_ice_reservation, name='add_club_ice_reservation'),
 ]

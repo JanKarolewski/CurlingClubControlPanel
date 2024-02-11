@@ -44,8 +44,12 @@
                right: 'agendaWeek,agendaDay'
            },
            defaultView: 'agendaWeek',
-           events: '/all_events',
+           events: '/api/Reservation/reservation_for_calendar',
            selectable: true,
+           minTime: '08:00:00',
+           maxTime: '21:00:00',
+           expandRows: true,
+           height: "auto",
            selectHelper: true,
            editable: true,
            allDaySlot: false,
@@ -53,11 +57,11 @@
            select: function (start, end, allDay) {
                var title = prompt("Enter Event Title");
                if (title) {
-                   var start = $.fullCalendar.formatDate(start, "Y-MM-DD HH:mm:ss");
-                   var end = $.fullCalendar.formatDate(end, "Y-MM-DD HH:mm:ss");
+                   var start = $.fullCalendar.formatDate(start, "Y-MM-DD HH:mm");
+                   var end = $.fullCalendar.formatDate(end, "Y-MM-DD HH:mm");
                    $.ajax({
                        type: "GET",
-                       url: '/add_event',
+                       url: '/api/Reservation/add_reservation',
                        data: {'title': title, 'start': start, 'end': end},
                        dataType: "json",
                        success: function (data) {
@@ -71,8 +75,8 @@
                }
            },
            eventResize: function (event) {
-               var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm:ss");
-               var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm:ss");
+               var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm");
+               var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm");
                var title = event.title;
                var id = event.id;
                $.ajax({
@@ -91,8 +95,8 @@
            },
 
            eventDrop: function (event) {
-               var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm:ss");
-               var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm:ss");
+               var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm");
+               var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm");
                var title = event.title;
                var id = event.id;
                $.ajax({

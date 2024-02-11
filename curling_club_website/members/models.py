@@ -5,6 +5,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
 
+from events.models import Venue
+
 
 class Club(models.Model):
     name = models.CharField(max_length=255)
@@ -69,6 +71,8 @@ class ClubIceOpenHours(models.Model):
     weekday = models.IntegerField(choices=WEEKDAYS, unique=True)
     from_hour = models.TimeField()
     to_hour = models.TimeField()
+    # ToDo
+    # venue = miejsce
 
     class Meta:
         verbose_name_plural = "Club Ice Open Hours"
@@ -89,3 +93,35 @@ class ClubIceOpenHours(models.Model):
     @property
     def day_week_number(self):
         return int(self.WEEKDAYS[self.weekday - 1][0])
+
+
+class Reservation(models.Model):
+    # rezerwacja ma zawierać:
+    # auto ID
+    # administratora rezerwacji -> usera, który tę rezerwację założył
+    # osoby, które uczestniczą w tej rezerwacji
+    # datę rezerwacji
+    # godzinę od
+    # godzinę do
+    # miejsce rezerwacji/ lodowisko -> venue
+    # status = Potwierdzona, Zgłoszona, Rozliczona,
+
+    class Status(models.TextChoices):
+        Waiting_for_confirmation = "1", "Waiting for confirmation"
+        Confirmed = "2", "Confirmed"
+        Canceled = "3", "Canceled"
+        Settled = "4", "Settled"
+
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(blank=True, null=True, max_length=25)
+    note = models.CharField(blank=True, null=True, max_length=255)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    attendees = models.ManyToManyField(User, blank=True, null=True, related_name='attendees')
+    from_hour = models.DateTimeField(blank=True, null=True)
+    to_hour = models.DateTimeField(blank=True, null=True)
+    venue = models.ForeignKey(Venue, blank=True, null=True, on_delete=models.SET_NULL, related_name='Reservation_venue')
+    club = models.ForeignKey(Club, blank=True, null=True, on_delete=models.CASCADE, related_name='Reservation_club')
+    month = models.CharField(max_length=2, choices=Status.choices, default=Status.Waiting_for_confirmation)
+
+    def __str__(self):
+        return str(self.title) + " | " + str(self.creator) + " | " + str(self.month)

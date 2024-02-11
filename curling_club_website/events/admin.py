@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 
-from members.models import Club, Profile, ClubIceOpenHours
+from members.models import Club, Profile, ClubIceOpenHours, Reservation
 from .models import Venue, Event, Post
 
 admin.site.register(Venue)
@@ -9,7 +9,15 @@ admin.site.register(Event)
 admin.site.register(Post)
 admin.site.register(Club)
 admin.site.register(Profile)
+# admin.site.register(Reservation)
 admin.site.register(ClubIceOpenHours)
+
+
+@admin.register(Reservation)
+class ReservationAdmin(admin.ModelAdmin):
+    list_display = ('title', 'from_hour', 'to_hour')
+    ordering = ('-from_hour',)
+
 
 # @admin.register(Venue)
 # class VenueAdmin(admin.ModelAdmin):
