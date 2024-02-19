@@ -5,7 +5,7 @@
 <h4>Ice availability</h4>
 <br/>
 
-<a href="{% url 'club-ice-availability-schedule' %}">
+<a href="{% url 'venue-ice-availability-schedule' %}">
     <button type="button" class="btn btn-primary ">Add availability schedule</button>
 </a>
 
@@ -19,7 +19,7 @@
     </tr>
     </thead>
     <tbody>
-    {% for day in club_ice_schedule %}
+    {% for day in venue_ice_schedule %}
     <tr>
         <th scope="row">{{ day.day_week_name }}</th>
         <td>{{ day.from_hour|time:'H:i' }}</td>

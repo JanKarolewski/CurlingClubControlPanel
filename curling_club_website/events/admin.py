@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 
-from members.models import Club, Profile, ClubIceOpenHours, Reservation
+from members.models import Club, Profile, VenueIceOpenHours, Reservation
 from .models import Venue, Event, Post
 
 admin.site.register(Venue)
@@ -10,7 +10,7 @@ admin.site.register(Post)
 admin.site.register(Club)
 admin.site.register(Profile)
 # admin.site.register(Reservation)
-admin.site.register(ClubIceOpenHours)
+admin.site.register(VenueIceOpenHours)
 
 
 @admin.register(Reservation)

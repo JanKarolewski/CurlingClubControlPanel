@@ -40,9 +40,15 @@ class ReservationViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
     def get_queryset(self):
-        print("get_queryset")
         self.queryset = self.queryset.filter(club=self.request.user.profile.club)
-        print(self.queryset)
+        start = self.request.GET.get('start', None)
+        end = self.request.GET.get('end', None)
+        if start:
+            start = datetime.strptime(start, "%Y-%m-%dT%H:%M:%S")
+            self.queryset = self.queryset.filter(from_hour__gte=start)
+        if end:
+            end = datetime.strptime(end, "%Y-%m-%dT%H:%M:%S")
+            self.queryset = self.queryset.filter(to_hour__lte=end)
         return self.queryset
 
     @action(detail=False, methods=['GET'])
@@ -57,7 +63,6 @@ class ReservationViewSet(viewsets.ModelViewSet):
                 'start': reservation.from_hour,
                 'end': reservation.to_hour,
             })
-        print(out)
         return JsonResponse(out, safe=False)
         # serializer = self.get_serializer(self.get_queryset(), many=True)
         # return Response(serializer.data)
@@ -67,15 +72,6 @@ class ReservationViewSet(viewsets.ModelViewSet):
         start = self.request.GET.get("start", None)
         end = self.request.GET.get("end", None)
         title = self.request.GET.get("title", None)
-
-        print(start)
-        print(end)
-        print(title)
-
-        # print(start)
-        # start = datetime.strptime(start, '%y-%m-%d %H:%M:%S')
-        # print(start.time())
-        #
         event = Reservation(title=str(title), from_hour=start, to_hour=end, creator=request.user,
                             club=self.request.user.profile.club)
 

@@ -20,19 +20,19 @@
         <li class="nav-item">
           <a class="nav-link" href="{% url 'all-events' %}">All Events</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'add-venue' %}">Add venue</a>
-        </li>
         {% if not user.is_authenticated %}
         <li class="nav-item">
           <a class="nav-link" href="{% url 'register-user' %}">Reqister User</a>
         </li>
         {% endif %}
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and not user.profile.club %}
         <li class="nav-item">
           <a class="nav-link" href="{% url 'register-club' %}">Reqister New Club</a>
         </li>
         {% endif %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'add-venue' %}">Add venue</a>
+        </li>
         <li class="nav-item">
         </li>
       </ul>
@@ -48,6 +48,9 @@
           <a href="{% url 'club-admin-panel' pk=user.profile.club.id %}">
             <button class="btn btn-info" type="button">Club</button>
           </a>
+        <a href="{% url 'venue-info-panel' %}">
+          <button class="btn btn-warning" type="button">Venue</button>
+        </a>
         {% endif%}
         <a href="{% url 'logout' %}">
           <button class="btn btn-secondary" type="button">Logout</button>

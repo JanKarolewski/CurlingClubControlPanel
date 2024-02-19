@@ -41,6 +41,7 @@ class Profile(models.Model):
     photo_profile = models.ImageField(blank=True, null=True, upload_to='user_photo_profile/', default='uploads/OIP.jpg')
     club_profile_status = models.CharField(choices=profile_status_choices, blank=True, null=True,
                                            default="No_club_member", max_length=100)
+    venue = models.ForeignKey(Venue, null=True, blank=True, on_delete=models.CASCADE)
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
@@ -56,7 +57,7 @@ class Profile(models.Model):
         return str(self.user.username) + " | " + str(self.club)
 
 
-class ClubIceOpenHours(models.Model):
+class VenueIceOpenHours(models.Model):
     WEEKDAYS = [
         (1, _("Monday")),
         (2, _("Tuesday")),
@@ -67,15 +68,13 @@ class ClubIceOpenHours(models.Model):
         (7, _("Sunday")),
     ]
 
-    club = models.ForeignKey(Club, blank=True, null=True, on_delete=models.CASCADE, related_name='club')
+    venue = models.ForeignKey(Venue, blank=True, null=True, on_delete=models.CASCADE, related_name='venue')
     weekday = models.IntegerField(choices=WEEKDAYS, unique=True)
     from_hour = models.TimeField()
     to_hour = models.TimeField()
-    # ToDo
-    # venue = miejsce
 
     class Meta:
-        verbose_name_plural = "Club Ice Open Hours"
+        verbose_name_plural = "Venue Ice Open Hours"
         ordering = ('weekday', 'from_hour')
         unique_together = ('weekday', 'from_hour', 'to_hour')
 
@@ -84,7 +83,7 @@ class ClubIceOpenHours(models.Model):
                                  self.from_hour, self.to_hour)
 
     def __str__(self):
-        return str(self.WEEKDAYS[self.weekday-1][1]) + " | " + str(self.club)
+        return str(self.WEEKDAYS[self.weekday-1][1]) + " | " + str(self.venue)
 
     @property
     def day_week_name(self):

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Venue(models.Model):
@@ -8,6 +9,7 @@ class Venue(models.Model):
     phone = models.CharField('Phone', max_length=10)
     web = models.URLField('URL Adress', blank=True)
     email_adress = models.EmailField('Email', max_length=120)
+    administrator = models.OneToOneField(User, on_delete=models.PROTECT, default=None, blank=True, null=True)
 
     def __str__(self):
         return self.name

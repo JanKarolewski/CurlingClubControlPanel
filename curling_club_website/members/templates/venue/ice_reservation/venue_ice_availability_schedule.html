@@ -4,7 +4,7 @@
 
 <h4>Ice Schedule</h4>
 <br/><br/><br/>
-    <form action="{% url 'club-ice-availability-schedule' %}" method=POST>
+    <form action="{% url 'venue-ice-availability-schedule' %}" method=POST>
 		{% csrf_token %}
 			{{ form }}
         <input type="submit" value="Submit" class="btn btn-secondary">

@@ -1,0 +1,12 @@
+{% extends 'events/base.html' %}
+{% block content %}
+
+
+<h4>Venue control Panel</h4>
+<br/><br/><br/>
+
+Your venue is: {{ venue }} <br>
+
+<a href="{% url 'venue-calendar-reservation-view' %}"><button type="button" class="btn btn-primary ">Curling Arena Reservation</button></a>
+
+{% endblock %}

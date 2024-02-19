@@ -17,8 +17,9 @@ import calendar
 from calendar import HTMLCalendar
 from datetime import datetime
 
-from members.forms import RegisterUserForm, RegisterClubForm, ProfileForm, ClubIceOpenHoursForm
-from members.models import Profile, Club, ClubIceOpenHours, Reservation
+from events.models import Venue
+from members.forms import RegisterUserForm, RegisterClubForm, ProfileForm, VenueIceOpenHoursForm
+from members.models import Profile, Club, VenueIceOpenHours, Reservation
 
 
 def login_user(request):
@@ -196,21 +197,31 @@ class MembersClubView(ListView):
         return redirect('club-members-panel')
 
 
-def club_calendar_reservation_view(request):
-    club_ice_schedule = ClubIceOpenHours.objects.filter(club=request.user.profile.club)
-    return render(request,'club/ice_reservation/ice_reseravion_control_panel.html',
-                  {'club_ice_schedule': club_ice_schedule})
+def venue_info_panel(request):
+    venue = Venue.objects.get(administrator=request.user)
+
+    print(request.user.profile)
+
+    return render(request, 'venue/venue_control_panel.html', {
+        'venue': venue
+    })
+
+
+def venue_calendar_reservation_view(request):
+    venue_ice_schedule = VenueIceOpenHours.objects.filter(venue=request.user.profile.venue)
+    return render(request, 'venue/ice_reservation/venue_reseravion_control_panel.html',
+                  {'venue_ice_schedule': venue_ice_schedule})
 
 
 def edit_ice_availability_schedule(request, day_name):
     if request.user.is_authenticated:
-        club_ice_open_hours = ClubIceOpenHours.objects.get(club=request.user.profile.club, weekday=day_name)
-        form = ClubIceOpenHoursForm(request.POST or None, instance=club_ice_open_hours)
+        venue_ice_open_hours = VenueIceOpenHours.objects.get(venue=request.user.profile.venue, weekday=day_name)
+        form = VenueIceOpenHoursForm(request.POST or None, instance=venue_ice_open_hours)
         if form.is_valid():
             form.save()
             messages.success(request, "Zaktualizowano dane o dostępności lodu")
-            return redirect('club-calendar-reservation-view')
-        return render(request, 'club/ice_reservation/edit_club_ice_availability_schedule.html',
+            return redirect('venue-calendar-reservation-view')
+        return render(request, 'venue/ice_reservation/edit_venue_ice_availability_schedule.html',
                       {'form': form, 'day_name': day_name})
     else:
         messages.error(request, "Musisz być zalogowanym")
@@ -219,26 +230,26 @@ def edit_ice_availability_schedule(request, day_name):
 
 def delete_ice_availability_schedule(request, day_name):
     if request.user.is_authenticated:
-        club_ice_open_hours = ClubIceOpenHours.objects.get(club=request.user.profile.club, weekday=day_name)
-        print(club_ice_open_hours)
-        club_ice_open_hours.delete()
+        venue_ice_open_hours = VenueIceOpenHours.objects.get(venue=request.user.profile.venue, weekday=day_name)
+        # print(club_ice_open_hours)
+        venue_ice_open_hours.delete()
         messages.success(request, "Wykreślono dane o dostępności lodu")
-        return redirect('club-calendar-reservation-view')
+        return redirect('venue-calendar-reservation-view')
     else:
         messages.error(request, "Musisz być zalogowanym")
         return redirect('home')
 
 
-def club_ice_availability_schedule(request):
+def venue_ice_availability_schedule(request):
     if request.user.is_authenticated:
-        user_club = request.user.profile.club
-        form = ClubIceOpenHoursForm(request.POST or None)
+        user_venue = request.user.profile.venue
+        form = VenueIceOpenHoursForm(request.POST or None)
         if form.is_valid():
-            form.instance.club = user_club
+            form.instance.venue = user_venue
             form.save()
             messages.success(request, "Zaktualizowano dane o dostępności lodu")
-            return redirect('club-calendar-reservation-view')
-        return render(request, 'club/ice_reservation/club_ice_availability_schedule.html', {'form': form})
+            return redirect('venue-calendar-reservation-view')
+        return render(request, 'venue/ice_reservation/venue_ice_availability_schedule.html', {'form': form})
     else:
         messages.error(request, "Musisz być zalogowanym")
         return redirect('home')
