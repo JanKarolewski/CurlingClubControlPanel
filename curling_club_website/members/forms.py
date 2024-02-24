@@ -5,7 +5,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberPrefixWidget
 from django import forms
 
-from members.models import Club, Profile, VenueIceOpenHours
+from members.models import Club, Profile, VenueIceOpenHours, VenueTrack
 
 
 class RegisterUserForm(UserCreationForm):
@@ -78,3 +78,14 @@ class VenueIceOpenHoursForm(ModelForm):
         self.fields['weekday'].widget.attrs['class'] = 'form-control'
         self.fields['from_hour'].widget.attrs['class'] = 'form-control'
         self.fields['to_hour'].widget.attrs['class'] = 'form-control'
+
+
+class VenueTrackForm(ModelForm):
+
+    class Meta:
+        model = VenueTrack
+        fields = ('note', )
+
+    def __init__(self, *args, **kwargs):
+        super(VenueTrackForm, self).__init__(*args, **kwargs)
+        self.fields['note'].widget.attrs['class'] = 'form-control'

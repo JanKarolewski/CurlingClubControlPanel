@@ -1,0 +1,15 @@
+{% extends 'events/base.html' %}
+{% block content %}
+
+
+<h4>Venue Track Panel</h4>
+<br/>
+
+Your {{ venue }} track <br>
+    <form action="{% url 'venue-track-form' %}" method=POST>
+		{% csrf_token %}
+			{{ form }}
+        <input type="submit" value="Submit" class="btn btn-secondary">
+	</form>
+
+{% endblock %}

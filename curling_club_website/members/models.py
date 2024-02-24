@@ -118,9 +118,19 @@ class Reservation(models.Model):
     attendees = models.ManyToManyField(User, blank=True, null=True, related_name='attendees')
     from_hour = models.DateTimeField(blank=True, null=True)
     to_hour = models.DateTimeField(blank=True, null=True)
+    reservation_date = models.DateField(blank=True, null=True)
     venue = models.ForeignKey(Venue, blank=True, null=True, on_delete=models.SET_NULL, related_name='Reservation_venue')
     club = models.ForeignKey(Club, blank=True, null=True, on_delete=models.CASCADE, related_name='Reservation_club')
     month = models.CharField(max_length=2, choices=Status.choices, default=Status.Waiting_for_confirmation)
 
     def __str__(self):
         return str(self.title) + " | " + str(self.creator) + " | " + str(self.month)
+
+
+class VenueTrack(models.Model):
+    id = models.AutoField(primary_key=True)
+    note = models.CharField(blank=True, null=True, max_length=5)
+    venue = models.ForeignKey(Venue, blank=True, null=True, on_delete=models.SET_NULL, related_name='Resources_venue')
+
+    def __str__(self):
+        return str(self.venue) + " | " + str(self.note)

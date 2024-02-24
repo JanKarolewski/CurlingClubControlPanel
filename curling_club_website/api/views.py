@@ -44,11 +44,11 @@ class ReservationViewSet(viewsets.ModelViewSet):
         start = self.request.GET.get('start', None)
         end = self.request.GET.get('end', None)
         if start:
-            start = datetime.strptime(start, "%Y-%m-%dT%H:%M:%S")
-            self.queryset = self.queryset.filter(from_hour__gte=start)
+            start = datetime.strptime(start, "%Y-%m-%d")
+            self.queryset = self.queryset.filter(reservation_date__gte=start)
         if end:
-            end = datetime.strptime(end, "%Y-%m-%dT%H:%M:%S")
-            self.queryset = self.queryset.filter(to_hour__lte=end)
+            end = datetime.strptime(end, "%Y-%m-%d")
+            self.queryset = self.queryset.filter(reservation_date__lte=end)
         return self.queryset
 
     @action(detail=False, methods=['GET'])
@@ -62,6 +62,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
                 'id': reservation.id,
                 'start': reservation.from_hour,
                 'end': reservation.to_hour,
+                # toDo resourceId in reservation
+                'resourceId': 'room101',
             })
         return JsonResponse(out, safe=False)
         # serializer = self.get_serializer(self.get_queryset(), many=True)

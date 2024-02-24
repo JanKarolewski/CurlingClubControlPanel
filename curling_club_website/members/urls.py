@@ -16,13 +16,18 @@ urlpatterns = [
     path('venue_info_panel', views.venue_info_panel, name='venue-info-panel'),
     path('venue-calendar-reservation-view', views.venue_calendar_reservation_view,
          name='venue-calendar-reservation-view'),
-
     path('venue-ice-availability-schedule', views.venue_ice_availability_schedule,
          name='venue-ice-availability-schedule'),
     path('edit-ice-availability-schedule/<int:day_name>', views.edit_ice_availability_schedule,
          name='edit-ice-availability-schedule'),
     path('delete-ice-availability-schedule/<int:day_name>', views.delete_ice_availability_schedule,
          name='delete-ice-availability-schedule'),
+    path('venue-tracks-view', views.venue_tracks_view, name='venue-tracks-view'),
+    path('venue-track-form', views.venue_track_form, name='venue-track-form'),
+    path('edit-venue-track/<int:track_id>', views.edit_venue_track,
+         name='edit-venue-track'),
+    path('delete-venue-track/<int:track_id>', views.delete_venue_track,
+         name='delete-venue-track'),
 
     # user administration
     path('register_user', views.register_user, name='register-user'),

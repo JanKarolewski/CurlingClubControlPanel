@@ -2,6 +2,8 @@
 virt
 db.sqlite3
 curling_club_website/events/__pycache__/admin.cpython-312.pyc
+curling_club_website/node_modules/
+
 *.pyc
 
 curling_club_website/curling_club_website/__pycache__/urls.cpython-312.pyc

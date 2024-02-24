@@ -11,12 +11,12 @@
     {% bootstrap_javascript %}
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@event-calendar/build@2.6.1/event-calendar.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@event-calendar/build@2.6.1/event-calendar.min.js"></script>
   </head>
 
-  <body>
+  <body onload="loadData()">
     {% include 'events/navbar.html' %}
     {% load static %}
 <!--    <script src="{% static 'dist/app.bundle.js' %}"></script>-->
@@ -36,106 +36,103 @@
       {% endblock %}
     </div>
   <script>
-   $(document).ready(function () {
-       var calendar = $('#calendar').fullCalendar({
-           header: {
-               left: 'prev,next today',
-               center: 'title',
-               right: 'agendaWeek,agendaDay'
-           },
-           defaultView: 'agendaWeek',
-           events: '/api/Reservation/reservation_for_calendar',
-           selectable: true,
-           minTime: '08:00:00',
-           maxTime: '21:00:00',
-           expandRows: true,
-           height: "auto",
-           selectHelper: true,
-           editable: true,
-           allDaySlot: false,
-           eventLimit: true,
-           select: function (start, end, allDay) {
-               var title = prompt("Enter Event Title");
-               if (title) {
-                   var start = $.fullCalendar.formatDate(start, "Y-MM-DD HH:mm");
-                   var end = $.fullCalendar.formatDate(end, "Y-MM-DD HH:mm");
-                   $.ajax({
-                       type: "GET",
-                       url: '/api/Reservation/add_reservation',
-                       data: {'title': title, 'start': start, 'end': end},
-                       dataType: "json",
-                       success: function (data) {
-                           calendar.fullCalendar('refetchEvents');
-                           alert("Added Successfully");
-                       },
-                       error: function (data) {
-                           alert('There is a problem!!!');
-                       }
-                   });
-               }
-           },
-           eventResize: function (event) {
-               var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm");
-               var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm");
-               var title = event.title;
-               var id = event.id;
-               $.ajax({
-                   type: "GET",
-                   url: '/update',
-                   data: {'title': title, 'start': start, 'end': end, 'id': id},
-                   dataType: "json",
-                   success: function (data) {
-                       calendar.fullCalendar('refetchEvents');
-                       alert('Event Update');
-                   },
-                   error: function (data) {
-                       alert('There is a problem!!!');
-                   }
-               });
-           },
 
-           eventDrop: function (event) {
-               var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm");
-               var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm");
-               var title = event.title;
-               var id = event.id;
-               $.ajax({
-                   type: "GET",
-                   url: '/update',
-                   data: {'title': title, 'start': start, 'end': end, 'id': id},
-                   dataType: "json",
-                   success: function (data) {
-                       calendar.fullCalendar('refetchEvents');
-                       alert('Event Update');
-                   },
-                   error: function (data) {
-                       alert('There is a problem!!!');
-                   }
-               });
-           },
+    let ec = new EventCalendar(document.getElementById('ec'), {
+      props: {
+          options: {
+            view: 'timeGridWeek',
+            allDay: false,
+          }
+      },
+      select: function (start, end, allDay) {
+         var title = prompt("Enter Event Title");
+         if (title) {
+             $.ajax({
+                 type: "GET",
+                 url: '/api/Reservation/add_reservation',
+<!--                 data: {'title': title, 'start': start, 'end': end},-->
+                 dataType: "json",
+                 success: function (data) {
+                   ec.refetchEvents();
+                   alert("Added Successfully");
+                 },
+                 error: function (data) {
+                     alert('There is a problem!!!');
+                 }
+             });
+         }
+      },
+    });
 
-           eventClick: function (event) {
-               if (confirm("Are you sure you want to remove it?")) {
-                   var id = event.id;
-                   $.ajax({
-                       type: "GET",
-                       url: '/remove',
-                       data: {'id': id},
-                       dataType: "json",
-                       success: function (data) {
-                           calendar.fullCalendar('refetchEvents');
-                           alert('Event Removed');
-                       },
-                       error: function (data) {
-                           alert('There is a problem!!!');
-                       }
-                   });
-               }
-           },
+    ec.setOption('allDaySlot', false);
+    ec.setOption('firstDay', 1);
+    ec.setOption('nowIndicator', true);
+    ec.setOption('slotMinTime', 7);
+    ec.setOption('center', 'title');
+    ec.setOption('editable', true);
+    ec.setOption('selectable', true);
+    ec.setOption('datesSet', goToDate);
 
-       });
-   });
+<!--    ec.setOption('view', 'listWeek');-->
+    ec.setOption('view', 'resourceTimeGridDay');
 
-</script>
+    ec.setOption('resources', [
+      {id: "room101", title: "Room 101"},
+      {id: "room102", title: "Room 101"},
+	]);
+
+    function loadData (info) {
+      console.log("get Data from end Point")
+      loadReservation();
+<!--      ToDO-->
+<!--      loadResources();-->
+    }
+
+    function loadReservation() {
+      console.log("loadReservation")
+      let date = ec.getOption('date');
+      var date_basic = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
+
+      $.ajax({
+        type: "GET",
+        url: '/api/Reservation/reservation_for_calendar',
+        data: {'start': date_basic, 'end': date_basic},
+        dataType: "json",
+        success: function (data) {
+          console.log(data);
+          ec.setOption('events', data);
+          alert("Load Events Successfully");
+
+        },
+        error: function (data) {
+           alert('There is a problem!!!');
+        }
+      });
+    }
+
+  function goToDate() {
+    let date = ec.getOption('date');
+    var date_basic = date.getFullYear()+"-"+ (date.getMonth()+1) +"-"+date.getDate();
+
+    $.ajax({
+        type: "GET",
+        url: '/api/Reservation/reservation_for_calendar',
+        data: {'start': date_basic, 'end': date_basic},
+        dataType: "json",
+        success: function (data) {
+          console.log(data);
+          ec.setOption('events', data)
+          alert("Load Events Successfully");
+
+        },
+        error: function (data) {
+           alert('There is a problem!!!');
+        }
+      });
+
+
+  }
+
+  </script>
   </body>
 </html>

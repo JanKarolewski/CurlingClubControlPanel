@@ -18,8 +18,8 @@ from calendar import HTMLCalendar
 from datetime import datetime
 
 from events.models import Venue
-from members.forms import RegisterUserForm, RegisterClubForm, ProfileForm, VenueIceOpenHoursForm
-from members.models import Profile, Club, VenueIceOpenHours, Reservation
+from members.forms import RegisterUserForm, RegisterClubForm, ProfileForm, VenueIceOpenHoursForm, VenueTrackForm
+from members.models import Profile, Club, VenueIceOpenHours, Reservation, VenueTrack
 
 
 def login_user(request):
@@ -142,7 +142,7 @@ class ClubView(DetailView):
     context_object_name = 'club'
     template_name = 'club/administration/club_basic_admin_panel.html'
 
-    #ToDo
+    # ToDo
     # permission_required = '(only_user_in_admin_club_group, only_my_club, only_login)' PermissionRequiredMixin
 
     # def get_context_data(self, *args, **kwargs):
@@ -231,7 +231,6 @@ def edit_ice_availability_schedule(request, day_name):
 def delete_ice_availability_schedule(request, day_name):
     if request.user.is_authenticated:
         venue_ice_open_hours = VenueIceOpenHours.objects.get(venue=request.user.profile.venue, weekday=day_name)
-        # print(club_ice_open_hours)
         venue_ice_open_hours.delete()
         messages.success(request, "Wykreślono dane o dostępności lodu")
         return redirect('venue-calendar-reservation-view')
@@ -258,4 +257,53 @@ def venue_ice_availability_schedule(request):
 def create_ice_reservation_for_user(request, day=datetime.now().day, month=datetime.now().month,
                                     year=datetime.now().year):
     # /create-ice-reservation-for-user/?year:2028/month:5/
-    return render(request, 'club/ice_reservation/create_ice_reservation_for_user.html')
+    return render(request, 'venue/ice_reservation/create_ice_reservation_for_user.html')
+
+
+########################### VENUE TRACK ###########################
+def venue_tracks_view(request):
+    venue = request.user.profile.venue
+    venue_track_data = VenueTrack.objects.filter(venue=venue)
+    return render(request, 'venue/track_admin/venue_tracks_view.html', {'venue': venue,
+                                                                        'venue_track_data': venue_track_data})
+
+
+def venue_track_form(request):
+    if request.user.is_authenticated:
+        user_venue = request.user.profile.venue
+        form = VenueTrackForm(request.POST or None)
+        if form.is_valid() and user_venue:
+            form.instance.venue = user_venue
+            form.save()
+            messages.success(request, "Zaktualizowano dane torze")
+            return redirect('venue-tracks-view')
+        return render(request, 'venue/track_admin/venue_tracks_information.html', {'form': form})
+    else:
+        messages.error(request, "Musisz być zalogowanym")
+        return redirect('home')
+
+
+def edit_venue_track(request, track_id):
+    if request.user.is_authenticated:
+        venue_track_form_info = VenueTrack.objects.get(venue=request.user.profile.venue, id=track_id)
+        form = VenueTrackForm(request.POST or None, instance=venue_track_form_info)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Zaktualizowano dane o torze")
+            return redirect('venue-tracks-view')
+        return render(request, 'venue/track_admin/edit_venue_tracks_information.html',
+                      {'form': form, 'track_id': track_id})
+    else:
+        messages.error(request, "Musisz być zalogowanym")
+        return redirect('home')
+
+
+def delete_venue_track(request, track_id):
+    if request.user.is_authenticated:
+        venue_track_form_info = VenueTrack.objects.get(venue=request.user.profile.venue, id=track_id)
+        venue_track_form_info.delete()
+        messages.success(request, "Wykreślono dane o torze")
+        return redirect('venue-tracks-view')
+    else:
+        messages.error(request, "Musisz być zalogowanym")
+        return redirect('home')
