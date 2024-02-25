@@ -254,10 +254,13 @@ def venue_ice_availability_schedule(request):
         return redirect('home')
 
 
-def create_ice_reservation_for_user(request, day=datetime.now().day, month=datetime.now().month,
+def create_ice_reservation_for_user(request, venue_id, day=datetime.now().day, month=datetime.now().month,
                                     year=datetime.now().year):
     # /create-ice-reservation-for-user/?year:2028/month:5/
-    return render(request, 'venue/ice_reservation/create_ice_reservation_for_user.html')
+    print(venue_id)
+    venue = Venue.objects.get(id=venue_id)
+    return render(request, 'venue/ice_reservation/create_ice_reservation_for_user.html',
+                  {'venue': venue})
 
 
 ########################### VENUE TRACK ###########################
@@ -283,6 +286,11 @@ def venue_track_form(request):
         return redirect('home')
 
 
+def all_venues_list(request):
+    venues = Venue.objects.values('name', 'address', 'id')
+    return render(request, 'venue/all_venue_list.html', {'venues': venues})
+
+
 def edit_venue_track(request, track_id):
     if request.user.is_authenticated:
         venue_track_form_info = VenueTrack.objects.get(venue=request.user.profile.venue, id=track_id)
@@ -300,10 +308,15 @@ def edit_venue_track(request, track_id):
 
 def delete_venue_track(request, track_id):
     if request.user.is_authenticated:
-        venue_track_form_info = VenueTrack.objects.get(venue=request.user.profile.venue, id=track_id)
-        venue_track_form_info.delete()
-        messages.success(request, "Wykreślono dane o torze")
-        return redirect('venue-tracks-view')
+        venue_track_query = VenueTrack.objects.filter(venue=request.user.profile.venue)
+        if venue_track_query.count() > 1:
+            venue_track_to_delete = venue_track_query.get(id=track_id)
+            venue_track_to_delete.delete()
+            messages.success(request, "Wykreślono dane o torze")
+            return redirect('venue-tracks-view')
+        else:
+            messages.error(request, "Nie można usunąć jedynego toru")
+            return redirect('venue-tracks-view')
     else:
         messages.error(request, "Musisz być zalogowanym")
         return redirect('home')

@@ -6,8 +6,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 
-from members.models import Club, Reservation
-from .serializers import VenueSerializer, ClubSerializer, ReservationSerializer
+from members.models import Club, Reservation, VenueTrack
+from .serializers import VenueSerializer, ClubSerializer, ReservationSerializer, VenueTrackSerializer
 from events.models import Venue
 
 from datetime import datetime
@@ -40,7 +40,11 @@ class ReservationViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
     def get_queryset(self):
-        self.queryset = self.queryset.filter(club=self.request.user.profile.club)
+        # ten club to po chuju jest, wyjebać to ale już. Podmienić to na Venue i nie pierdolić się.
+        # self.queryset = self.queryset.filter(club=self.request.user.profile.club)
+        venue = self.request.GET.get('venue', None)
+        print(venue)
+        self.queryset = self.queryset.filter(venue=venue)
         start = self.request.GET.get('start', None)
         end = self.request.GET.get('end', None)
         if start:
@@ -97,3 +101,9 @@ class ClubViewSet(viewsets.ModelViewSet):
     pagination_class = None
     # filter_backends = DEFAULT_FILTER_BACKENDS
 
+
+class VenueTrackViewSet(viewsets.ModelViewSet):
+    queryset = VenueTrack.objects.all()
+    serializer_class = VenueTrackSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None

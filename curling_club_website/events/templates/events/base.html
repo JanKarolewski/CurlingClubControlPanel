@@ -76,16 +76,10 @@
 <!--    ec.setOption('view', 'listWeek');-->
     ec.setOption('view', 'resourceTimeGridDay');
 
-    ec.setOption('resources', [
-      {id: "room101", title: "Room 101"},
-      {id: "room102", title: "Room 101"},
-	]);
-
     function loadData (info) {
       console.log("get Data from end Point")
-      loadReservation();
-<!--      ToDO-->
-<!--      loadResources();-->
+<!--      loadReservation();-->
+      loadResources();
     }
 
     function loadReservation() {
@@ -96,7 +90,7 @@
       $.ajax({
         type: "GET",
         url: '/api/Reservation/reservation_for_calendar',
-        data: {'start': date_basic, 'end': date_basic},
+        data: {'start': date_basic, 'end': date_basic, 'venue': {{ venue.id}} },
         dataType: "json",
         success: function (data) {
           console.log(data);
@@ -115,23 +109,36 @@
     var date_basic = date.getFullYear()+"-"+ (date.getMonth()+1) +"-"+date.getDate();
 
     $.ajax({
-        type: "GET",
-        url: '/api/Reservation/reservation_for_calendar',
-        data: {'start': date_basic, 'end': date_basic},
-        dataType: "json",
-        success: function (data) {
-          console.log(data);
-          ec.setOption('events', data)
-          alert("Load Events Successfully");
-
-        },
-        error: function (data) {
-           alert('There is a problem!!!');
-        }
-      });
-
-
+      type: "GET",
+      url: '/api/Reservation/reservation_for_calendar?venue={{ venue.id }}',
+      data: {'start': date_basic, 'end': date_basic},
+      dataType: "json",
+      success: function (data) {
+        console.log(data);
+        ec.setOption('events', data)
+        alert("Load Events Successfully");
+      },
+      error: function (data) {
+         alert('There is a problem!!!');
+      }
+    });
   }
+  function loadResources() {
+    $.ajax({
+      type: "GET",
+      url: '/api/VenueTrack',
+      dataType: "json",
+      success: function (data) {
+        console.log(data);
+        ec.setOption('resources', data)
+        alert("Load Events Successfully");
+      },
+      error: function (data) {
+         alert('There is a problem!!!');
+      }
+    });
+  }
+
 
   </script>
   </body>

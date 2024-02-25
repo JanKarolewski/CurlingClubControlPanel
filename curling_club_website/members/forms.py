@@ -84,8 +84,8 @@ class VenueTrackForm(ModelForm):
 
     class Meta:
         model = VenueTrack
-        fields = ('note', )
+        fields = ('title', )
 
     def __init__(self, *args, **kwargs):
         super(VenueTrackForm, self).__init__(*args, **kwargs)
-        self.fields['note'].widget.attrs['class'] = 'form-control'
+        self.fields['title'].widget.attrs['class'] = 'form-control'

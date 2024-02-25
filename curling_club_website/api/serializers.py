@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions, serializers
 from events.models import Venue
-from members.models import Club, Reservation
+from members.models import Club, Reservation, VenueTrack
 
 
 class VenueSerializer(serializers.ModelSerializer):
@@ -18,4 +18,10 @@ class ReservationSerializer(serializers.ModelSerializer):
 class ClubSerializer(serializers.ModelSerializer):
     class Meta:
         model = Club
+        fields = '__all__'
+
+
+class VenueTrackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VenueTrack
         fields = '__all__'

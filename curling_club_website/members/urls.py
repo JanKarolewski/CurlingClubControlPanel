@@ -24,10 +24,10 @@ urlpatterns = [
          name='delete-ice-availability-schedule'),
     path('venue-tracks-view', views.venue_tracks_view, name='venue-tracks-view'),
     path('venue-track-form', views.venue_track_form, name='venue-track-form'),
-    path('edit-venue-track/<int:track_id>', views.edit_venue_track,
-         name='edit-venue-track'),
-    path('delete-venue-track/<int:track_id>', views.delete_venue_track,
-         name='delete-venue-track'),
+    path('edit-venue-track/<int:track_id>', views.edit_venue_track, name='edit-venue-track'),
+    path('delete-venue-track/<int:track_id>', views.delete_venue_track, name='delete-venue-track'),
+    path('all-venues-list', views.all_venues_list, name='all-venues-list'),
+
 
     # user administration
     path('register_user', views.register_user, name='register-user'),
@@ -37,8 +37,8 @@ urlpatterns = [
     path('update_profile', views.update_profile, name='update-profile'),
 
     # ice reservation calendar
-    re_path(r'create-ice-reservation-for-user/(?:year-(?P<year>[0-9]+)/)?$',
-            views.create_ice_reservation_for_user, name='create-ice-reservation-for-user'),
+    path('create-ice-reservation-for-user/<int:venue_id>', views.create_ice_reservation_for_user,
+         name='create-ice-reservation-for-user'),
     # path('all_club_ice_reservation/', views.all_club_ice_reservation, name='all_club_ice_reservation'),
     # path('add_club_ice_reservation/', views.add_club_ice_reservation, name='add_club_ice_reservation'),
 ]
