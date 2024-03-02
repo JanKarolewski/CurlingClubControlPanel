@@ -29,7 +29,7 @@ class Club(models.Model):
 
 class Profile(models.Model):
     profile_status_choices = [
-        ("No_club_member", "No club member"), # to jest bez sensu, wystarczy że poleclub będzie None
+        ("No_club_member", "No club member"),  # to jest bez sensu, wystarczy że poleclub będzie None
         ("User_sent_join_request", "User sent join request to Club"),
         ("Profile_change", "Profile change"),
         ("Confirmed_profile", "Confirmed profile"),
@@ -83,15 +83,29 @@ class VenueIceOpenHours(models.Model):
                                  self.from_hour, self.to_hour)
 
     def __str__(self):
-        return str(self.WEEKDAYS[self.weekday-1][1]) + " | " + str(self.venue)
+        return str(self.WEEKDAYS[self.weekday - 1][1]) + " | " + str(self.venue)
 
     @property
     def day_week_name(self):
-        return str(self.WEEKDAYS[self.weekday-1][1])
+        return str(self.WEEKDAYS[self.weekday - 1][1])
 
     @property
     def day_week_number(self):
         return int(self.WEEKDAYS[self.weekday - 1][0])
+
+
+class VenueTrack(models.Model):
+    # id = models.AutoField(primary_key=True)
+    title = models.CharField(blank=True, null=True, max_length=10, default="Track 1")
+    venue = models.ForeignKey(Venue, blank=True, null=True, on_delete=models.SET_NULL, related_name='Resources_venue')
+
+    def __str__(self):
+        return str(self.venue) + " | " + str(self.title)
+
+    @receiver(post_save, sender=Venue)
+    def create_default_track(sender, instance, created, **kwargs):
+        if created:
+            VenueTrack.objects.create(venue=instance)
 
 
 class Reservation(models.Model):
@@ -114,27 +128,20 @@ class Reservation(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(blank=True, null=True, max_length=25)
     note = models.CharField(blank=True, null=True, max_length=255)
+    track = models.ForeignKey(VenueTrack, on_delete=models.CASCADE, related_name='Reservation_track', default="")
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     attendees = models.ManyToManyField(User, blank=True, null=True, related_name='attendees')
     from_hour = models.DateTimeField(blank=True, null=True)
     to_hour = models.DateTimeField(blank=True, null=True)
     reservation_date = models.DateField(blank=True, null=True)
     venue = models.ForeignKey(Venue, blank=True, null=True, on_delete=models.SET_NULL, related_name='Reservation_venue')
+    #zmienic na inna nazwe, co to za głupota xD
     month = models.CharField(max_length=2, choices=Status.choices, default=Status.Waiting_for_confirmation)
 
     def __str__(self):
         return str(self.title) + " | " + str(self.creator) + " | " + str(self.month)
 
-
-class VenueTrack(models.Model):
-    # id = models.AutoField(primary_key=True)
-    title = models.CharField(blank=True, null=True, max_length=10, default="Track 1")
-    venue = models.ForeignKey(Venue, blank=True, null=True, on_delete=models.SET_NULL, related_name='Resources_venue')
-
-    def __str__(self):
-        return str(self.venue) + " | " + str(self.title)
-
-    @receiver(post_save, sender=Venue)
-    def create_default_track(sender, instance, created, **kwargs):
-        if created:
-            VenueTrack.objects.create(venue=instance)
+    @property
+    def default_venue_track(self):
+        default_track = VenueTrack.object.filter(venue=self.venue)[0]
+        return default_track

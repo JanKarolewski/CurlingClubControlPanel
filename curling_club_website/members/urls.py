@@ -37,6 +37,10 @@ urlpatterns = [
     path('update_profile', views.update_profile, name='update-profile'),
 
     # ice reservation calendar
+    # path for calendar as normal user
+    path('create-ice-reservation/<int:venue_id>', views.create_ice_reservation,
+         name='create-ice-reservation'),
+    # path for calendar for administrators
     path('create-ice-reservation-for-user/<int:venue_id>', views.create_ice_reservation_for_user,
          name='create-ice-reservation-for-user'),
     # path('all_club_ice_reservation/', views.all_club_ice_reservation, name='all_club_ice_reservation'),

@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@event-calendar/build@2.6.1/event-calendar.min.js"></script>
   </head>
 
-  <body onload="loadData()">
+  <body>
     {% include 'events/navbar.html' %}
     {% load static %}
 <!--    <script src="{% static 'dist/app.bundle.js' %}"></script>-->
@@ -35,111 +35,5 @@
 
       {% endblock %}
     </div>
-  <script>
-
-    let ec = new EventCalendar(document.getElementById('ec'), {
-      props: {
-          options: {
-            view: 'timeGridWeek',
-            allDay: false,
-          }
-      },
-      select: function (start, end, allDay) {
-         var title = prompt("Enter Event Title");
-         if (title) {
-             $.ajax({
-                 type: "GET",
-                 url: '/api/Reservation/add_reservation',
-<!--                 data: {'title': title, 'start': start, 'end': end},-->
-                 dataType: "json",
-                 success: function (data) {
-                   ec.refetchEvents();
-                   alert("Added Successfully");
-                 },
-                 error: function (data) {
-                     alert('There is a problem!!!');
-                 }
-             });
-         }
-      },
-    });
-
-    ec.setOption('allDaySlot', false);
-    ec.setOption('firstDay', 1);
-    ec.setOption('nowIndicator', true);
-    ec.setOption('slotMinTime', 7);
-    ec.setOption('center', 'title');
-    ec.setOption('editable', true);
-    ec.setOption('selectable', true);
-    ec.setOption('datesSet', goToDate);
-
-<!--    ec.setOption('view', 'listWeek');-->
-    ec.setOption('view', 'resourceTimeGridDay');
-
-    function loadData (info) {
-      console.log("get Data from end Point")
-<!--      loadReservation();-->
-      loadResources();
-    }
-
-    function loadReservation() {
-      console.log("loadReservation")
-      let date = ec.getOption('date');
-      var date_basic = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
-
-      $.ajax({
-        type: "GET",
-        url: '/api/Reservation/reservation_for_calendar',
-        data: {'start': date_basic, 'end': date_basic, 'venue': {{ venue.id}} },
-        dataType: "json",
-        success: function (data) {
-          console.log(data);
-          ec.setOption('events', data);
-          alert("Load Events Successfully");
-
-        },
-        error: function (data) {
-           alert('There is a problem!!!');
-        }
-      });
-    }
-
-  function goToDate() {
-    let date = ec.getOption('date');
-    var date_basic = date.getFullYear()+"-"+ (date.getMonth()+1) +"-"+date.getDate();
-
-    $.ajax({
-      type: "GET",
-      url: '/api/Reservation/reservation_for_calendar?venue={{ venue.id }}',
-      data: {'start': date_basic, 'end': date_basic},
-      dataType: "json",
-      success: function (data) {
-        console.log(data);
-        ec.setOption('events', data)
-        alert("Load Events Successfully");
-      },
-      error: function (data) {
-         alert('There is a problem!!!');
-      }
-    });
-  }
-  function loadResources() {
-    $.ajax({
-      type: "GET",
-      url: '/api/VenueTrack',
-      dataType: "json",
-      success: function (data) {
-        console.log(data);
-        ec.setOption('resources', data)
-        alert("Load Events Successfully");
-      },
-      error: function (data) {
-         alert('There is a problem!!!');
-      }
-    });
-  }
-
-
-  </script>
   </body>
 </html>

@@ -257,9 +257,16 @@ def venue_ice_availability_schedule(request):
 def create_ice_reservation_for_user(request, venue_id, day=datetime.now().day, month=datetime.now().month,
                                     year=datetime.now().year):
     # /create-ice-reservation-for-user/?year:2028/month:5/
-    print(venue_id)
     venue = Venue.objects.get(id=venue_id)
     return render(request, 'venue/ice_reservation/create_ice_reservation_for_user.html',
+                  {'venue': venue})
+
+
+def create_ice_reservation(request, venue_id, day=datetime.now().day, month=datetime.now().month,
+                                    year=datetime.now().year):
+    # /create-ice-reservation-for-user/?year:2028/month:5/
+    venue = Venue.objects.get(id=venue_id)
+    return render(request, 'venue/ice_reservation/create_ice_reservation.html',
                   {'venue': venue})
 
 

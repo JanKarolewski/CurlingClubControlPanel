@@ -5,12 +5,180 @@
 
 </script>
 
-<h4>Add Ice Reservation {{ venue.name }} </h4>
+<h4>Add Ice Reservation {{ venue.name }} Tutaj</h4>
 
 <div class="col-md-12">
-  <div id="ec">
+    <div id="ec">
 
-  </div>
+    </div>
 </div>
+
+<script>
+    window.onload = function() {
+      loadData();
+    };
+
+  let ec = new EventCalendar(document.getElementById('ec'), {
+    props: {
+        options: {
+          view: 'timeGridWeek',
+          allDay: false,
+        }
+    },
+    select: function (start, end, resource) {
+       var title = prompt("Enter Event Title");
+       var start_par = start.start;
+       var end_par = start.end;
+       var resource = start.resource.id;
+       if (title) {
+         $.ajax({
+             type: "GET",
+             url: '/api/Reservation/add_reservation',
+             data: {'venueId': {{venue.id}}, 'start': start_par, 'end': end_par, 'title': title, 'resourceId': resource},
+             dataType: "json",
+             success: function (data) {
+              console.log(data);
+              alert("Added Successfully");
+             },
+             error: function (data) {
+                 alert('There is a problem!!!');
+             }
+         });
+       }
+    },
+
+    eventResize: function(info) {
+      alert(info.event.title + " end is now " + info.event.end.toISOString());
+      console.log(info.event.id)
+      if (confirm("is this okay?") == true) {
+        $.ajax({
+             type: "GET",
+             url: '/api/Reservation/resize_reservation',
+             data: {'venueId': {{venue.id}}, 'end': info.event.end.toISOString(), 'reservation_id': info.event.id},
+             dataType: "json",
+             success: function (data) {
+              console.log(data);
+               alert("Added Successfully");
+             },
+             error: function (data) {
+                 alert('There is a problem!!!');
+                 info.revert();
+             }
+         });
+      } else {
+          console.log("tutaj");
+          info.revert();
+      }
+
+    },
+
+  eventDrop: function(info) {
+    let text = "is this okay?";
+    if (confirm(text) == true ) {
+
+      var startDrop = info.event.start;
+      var endDrop = info.event.end;
+      console.log(info)
+      if (info.newResource) {
+        var resource = info.newResource.id;
+      }
+      else {
+        var resource = null;
+      }
+      $.ajax({
+           type: "GET",
+           url: '/api/Reservation/drop_reservation',
+           data: {'venueId': {{venue.id}}, 'start': startDrop, 'end': endDrop, 'reservation_id': info.event.id, resourceId: resource},
+           dataType: "json",
+           success: function (data) {
+            console.log(data);
+            alert("Added Successfully");
+           },
+           error: function (data) {
+               alert('There is a problem!!!');
+               info.revert();
+           }
+       });
+      } else {
+        console.log("korekta, powrót do wczesniejszej informacji");
+        info.revert();
+      }
+    }
+  });
+
+  ec.setOption('allDaySlot', false);
+  ec.setOption('firstDay', 1);
+  ec.setOption('nowIndicator', true);
+  ec.setOption('slotMinTime', 7);
+  ec.setOption('center', 'title');
+  ec.setOption('editable', true);
+  ec.setOption('selectable', true);
+
+<!--    ec.setOption('view', 'listWeek');-->
+  ec.setOption('view', 'resourceTimeGridDay');
+
+  function loadData (info) {
+    console.log("get Data from end Point")
+<!--      loadReservation();-->
+    loadResources();
+    goToDate();
+  }
+
+  function loadReservation() {
+    let date = ec.getOption('date');
+    var date_basic = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
+
+    $.ajax({
+      type: "GET",
+      url: '/api/Reservation/reservation_for_calendar',
+      data: {'start': date_basic, 'end': date_basic, 'venue': {{ venue.id }} },
+      dataType: "json",
+      success: function (data) {
+        console.log(data);
+        ec.setOption('events', data);
+        alert("Load Events Successfully");
+      },
+      error: function (data) {
+         alert('There is a problem!!!');
+      }
+    });
+  }
+
+function goToDate() {
+  let date = ec.getOption('date');
+  var date_basic = date.getFullYear()+"-"+ (date.getMonth()+1) +"-"+date.getDate();
+
+  $.ajax({
+    type: "GET",
+    url: '/api/Reservation/reservation_for_calendar?venue={{ venue.id }}',
+    data: {'start': date_basic, 'end': date_basic},
+    dataType: "json",
+    success: function (data) {
+      console.log(data);
+      ec.setOption('events', data)
+      alert("Load Events Successfully");
+    },
+    error: function (data) {
+       alert('There is a problem!!!');
+    }
+  });
+}
+
+function loadResources() {
+  $.ajax({
+    type: "GET",
+    url: '/api/VenueTrack',
+    dataType: "json",
+    success: function (data) {
+      console.log(data);
+      ec.setOption('resources', data)
+      alert("Load Events Successfully");
+    },
+    error: function (data) {
+       alert('There is a problem!!!');
+    }
+  });
+}
+</script>
 
 {% endblock %}

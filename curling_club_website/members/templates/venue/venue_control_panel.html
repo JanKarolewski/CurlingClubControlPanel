@@ -11,4 +11,6 @@ Your venue is: {{ venue }} <br>
 
 <a href="{% url 'venue-tracks-view' %}"><button type="button" class="btn btn-primary ">Curling Arena Track</button></a>
 
+<a href="{% url 'create-ice-reservation-for-user' venue_id=venue.id %}"><button type="button" class="btn btn-primary ">Curling Arena Celandar</button></a>
+
 {% endblock %}

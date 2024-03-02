@@ -1,0 +1,125 @@
+{% extends 'events/base.html' %}
+{% block content %}
+
+<h4>Add Ice Reservation {{ venue.name }} only for user</h4>
+
+<div class="col-md-12">
+    <div id="ec_of">
+
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+      loadData();
+    };
+
+    let ec_ofu = new EventCalendar(document.getElementById('ec_of'), {
+        props: {
+            options: {
+              view: 'timeGridWeek',
+              allDay: false,
+            }
+        },
+        select: function (start, end, resource) {
+           var title = prompt("Enter Event Title");
+           var start_par = start.start;
+           var end_par = start.end;
+           var resource = start.resource.id;
+           if (title) {
+             $.ajax({
+                 type: "GET",
+                 url: '/api/Reservation/add_reservation',
+                 data: {'venueId': {{venue.id}}, 'start': start_par, 'end': end_par, 'title': title, 'resourceId': resource},
+                 dataType: "json",
+                 success: function (data) {
+                  console.log(data);
+                   alert("Added Successfully");
+                 },
+                 error: function (data) {
+                     alert('There is a problem!!!');
+                 }
+             });
+           }
+        },
+      });
+
+      ec_ofu.setOption('allDaySlot', false);
+      ec_ofu.setOption('firstDay', 1);
+      ec_ofu.setOption('nowIndicator', true);
+      ec_ofu.setOption('slotMinTime', 7);
+      ec_ofu.setOption('center', 'title');
+      ec_ofu.setOption('eventStartEditable', false);
+      ec_ofu.setOption('slotEventOverlap', false);
+      ec_ofu.setOption('eventDurationEditable', false);
+      ec_ofu.setOption('selectable', true);
+
+  <!--    ec_ofu.setOption('view', 'listWeek');-->
+      ec_ofu.setOption('view', 'resourceTimeGridDay');
+
+      function loadData (info) {
+        console.log("get Data from end Point")
+  <!--      loadReservation();-->
+        loadResources();
+        goToDate();
+      }
+
+      function loadReservation() {
+        let date = ec_ofu.getOption('date');
+        var date_basic = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
+
+        $.ajax({
+          type: "GET",
+          url: '/api/Reservation/reservation_for_calendar',
+          data: {'start': date_basic, 'end': date_basic, 'venue': {{ venue.id }} },
+          dataType: "json",
+          success: function (data) {
+            console.log(data);
+            ec_ofu.setOption('events', data);
+            alert("Load Events Successfully");
+          },
+          error: function (data) {
+             alert('There is a problem!!!');
+          }
+        });
+      }
+
+    function goToDate() {
+      let date = ec_ofu.getOption('date');
+      var date_basic = date.getFullYear()+"-"+ (date.getMonth()+1) +"-"+date.getDate();
+
+      $.ajax({
+        type: "GET",
+        url: '/api/Reservation/reservation_for_calendar?venue={{ venue.id }}',
+        data: {'start': date_basic, 'end': date_basic},
+        dataType: "json",
+        success: function (data) {
+          console.log(data);
+          ec_ofu.setOption('events', data)
+          alert("Load Events Successfully");
+        },
+        error: function (data) {
+           alert('There is a problem!!!');
+        }
+      });
+    }
+
+    function loadResources() {
+      $.ajax({
+        type: "GET",
+        url: '/api/VenueTrack',
+        dataType: "json",
+        success: function (data) {
+          console.log(data);
+          ec_ofu.setOption('resources', data)
+          alert("Load Events Successfully");
+        },
+        error: function (data) {
+           alert('There is a problem!!!');
+        }
+      });
+    }
+
+</script>
+
+{% endblock %}

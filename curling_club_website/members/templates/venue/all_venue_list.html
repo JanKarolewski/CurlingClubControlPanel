@@ -23,7 +23,7 @@
         <td>{{ venue.name }}</td>
         <td>{{ venue.address }} {{ venue.id }}</td>
         <td>
-            <a href="{% url 'create-ice-reservation-for-user' venue_id=venue.id %}">
+            <a href="{% url 'create-ice-reservation' venue_id=venue.id %}">
                 <button class="btn btn-primary" type="button">Add ice reservation</button>
             </a>
         </td>
