@@ -41,7 +41,6 @@ class Profile(models.Model):
     photo_profile = models.ImageField(blank=True, null=True, upload_to='user_photo_profile/', default='uploads/OIP.jpg')
     club_profile_status = models.CharField(choices=profile_status_choices, blank=True, null=True,
                                            default="No_club_member", max_length=100)
-    venue = models.ForeignKey(Venue, null=True, blank=True, on_delete=models.CASCADE)
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):

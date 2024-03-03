@@ -1,0 +1,36 @@
+{% extends 'events/base.html' %}
+{% block content %}
+
+
+<h4>Employees List</h4>
+<br/><br/><br/>
+
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th scope="row">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Surname</th>
+        <th scope="col">Phone number</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td scope="row">administrator</td>
+        <td>{{ venue_administrator.first_name }}</td>
+        <td>{{ venue_administrator.last_name }}</td>
+        <td>{{ venue_administrator.phone_number|default_if_none:"--" }}</td>
+    </tr>
+    <tr>
+    {% for employees in venue_employees %}
+        {{ employees }}
+        <th scope="row">{{ forloop.counter }}</th>
+        <td>{{ employees.user.first_name }}</td>
+        <td>{{ employees.user.last_name }}</td>
+        <td>{{ employees.phone_number|default_if_none:"--" }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

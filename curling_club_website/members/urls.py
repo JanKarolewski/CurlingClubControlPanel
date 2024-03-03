@@ -35,6 +35,8 @@ urlpatterns = [
     path('profile_panel', views.profile_panel, name='profile-panel'),
     path('update_user', views.update_user, name='update-user'),
     path('update_profile', views.update_profile, name='update-profile'),
+    path('add-profile-for-work-group/<int:venue_id>', views.add_profile_for_work_group, name='add-profile-for-work-group'),
+
 
     # ice reservation calendar
     # path for calendar as normal user

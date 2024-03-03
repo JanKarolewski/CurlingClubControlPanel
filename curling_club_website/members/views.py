@@ -128,6 +128,20 @@ def update_profile(request):
         return redirect('home')
 
 
+def add_profile_for_work_group(request, venue_id):
+    # print(Venue.objects.filter(id=venue_id).values('administrator', 'employees'))
+    venue_info = Venue.objects.filter(id=venue_id).values('administrator').first()
+    if venue_info["administrator"] == request.user.profile.pk:
+        # ToDo dodaj sprawdzenie, czy jest moze pracownikiem na lodowisku
+        venue_employees = Venue.objects.get(id=venue_id).employees.all()
+        venue_administrator = Venue.objects.get(id=venue_id).administrator
+        return render(request, 'venue/venue_add_profile_to_work_grup.html', {'venue_administrator': venue_administrator,
+                                                                             'venue_employees': venue_employees})
+    else:
+        messages.error(request, "Funkcjonajlność przeznaczona tylko dla aministratora lodowiska")
+        return redirect('home')
+
+
 def club_info_panel(request, club):
     club = Club.objects.filter(id=club).first()
     if club:

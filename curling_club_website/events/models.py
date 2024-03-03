@@ -10,6 +10,7 @@ class Venue(models.Model):
     web = models.URLField('URL Adress', blank=True)
     email_adress = models.EmailField('Email', max_length=120)
     administrator = models.OneToOneField(User, on_delete=models.PROTECT, default=None, blank=True, null=True)
+    employees = models.ManyToManyField('members.Profile', blank=True, null=True, related_name='Employees')
 
     def __str__(self):
         return self.name
