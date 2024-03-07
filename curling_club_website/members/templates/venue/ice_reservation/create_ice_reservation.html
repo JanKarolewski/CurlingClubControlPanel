@@ -42,6 +42,11 @@
              });
            }
         },
+
+        eventClick: function (info) {
+            deleteEvent(info.event);
+        }
+
       });
 
       ec_ofu.setOption('allDaySlot', false);
@@ -118,6 +123,30 @@
            alert('There is a problem!!!');
         }
       });
+    }
+
+    function deleteEvent(eventInfo) {
+      var start_event =  eventInfo.start;
+      var end_event =  eventInfo.end;
+      title = "Do You want delete that event?"
+      if (confirm(title)) {
+        $.ajax({
+          type: "GET",
+          url: '/api/Reservation/delete_reservation_from_calendar',
+          data: {'event_id': eventInfo.id, 'start': start_event, 'end': end_event, 'venue': {{ venue.id }} },
+          dataType: "json",
+          success: function (data) {
+            alert("Events Successfully Deleted");
+            // toDo maybe delte only from array events?
+            goToDate();
+          },
+          error: function (data) {
+             alert('There is a problem!!!');
+          }
+        });
+      } else {
+        alert('Operation aborded');
+      }
     }
 
 </script>

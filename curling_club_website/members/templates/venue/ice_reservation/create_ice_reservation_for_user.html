@@ -37,7 +37,6 @@
              data: {'venueId': {{venue.id}}, 'start': start_par, 'end': end_par, 'title': title, 'resourceId': resource},
              dataType: "json",
              success: function (data) {
-              console.log(data);
               alert("Added Successfully");
              },
              error: function (data) {
@@ -45,6 +44,10 @@
              }
          });
        }
+    },
+
+    eventClick: function (info) {
+        deleteEvent(info.event);
     },
 
     eventResize: function(info) {
@@ -78,7 +81,6 @@
 
       var startDrop = info.event.start;
       var endDrop = info.event.end;
-      console.log(info)
       if (info.newResource) {
         var resource = info.newResource.id;
       }
@@ -91,7 +93,6 @@
            data: {'venueId': {{venue.id}}, 'start': startDrop, 'end': endDrop, 'reservation_id': info.event.id, resourceId: resource},
            dataType: "json",
            success: function (data) {
-            console.log(data);
             alert("Added Successfully");
            },
            error: function (data) {
@@ -100,7 +101,6 @@
            }
        });
       } else {
-        console.log("korekta, powrót do wczesniejszej informacji");
         info.revert();
       }
     }
@@ -134,7 +134,6 @@
       data: {'start': date_basic, 'end': date_basic, 'venue': {{ venue.id }} },
       dataType: "json",
       success: function (data) {
-        console.log(data);
         ec.setOption('events', data);
         alert("Load Events Successfully");
       },
@@ -144,41 +143,64 @@
     });
   }
 
-function goToDate() {
-  let date = ec.getOption('date');
-  var date_basic = date.getFullYear()+"-"+ (date.getMonth()+1) +"-"+date.getDate();
+    function goToDate() {
+      let date = ec.getOption('date');
+      var date_basic = date.getFullYear()+"-"+ (date.getMonth()+1) +"-"+date.getDate();
 
-  $.ajax({
-    type: "GET",
-    url: '/api/Reservation/reservation_for_calendar?venue={{ venue.id }}',
-    data: {'start': date_basic, 'end': date_basic},
-    dataType: "json",
-    success: function (data) {
-      console.log(data);
-      ec.setOption('events', data)
-      alert("Load Events Successfully");
-    },
-    error: function (data) {
-       alert('There is a problem!!!');
+      $.ajax({
+        type: "GET",
+        url: '/api/Reservation/reservation_for_calendar?venue={{ venue.id }}',
+        data: {'start': date_basic, 'end': date_basic},
+        dataType: "json",
+        success: function (data) {
+          ec.setOption('events', data)
+          alert("Load Events Successfully");
+        },
+        error: function (data) {
+           alert('There is a problem!!!');
+        }
+      });
     }
-  });
-}
 
-function loadResources() {
-  $.ajax({
-    type: "GET",
-    url: '/api/VenueTrack',
-    dataType: "json",
-    success: function (data) {
-      console.log(data);
-      ec.setOption('resources', data)
-      alert("Load Events Successfully");
-    },
-    error: function (data) {
-       alert('There is a problem!!!');
+    function loadResources() {
+      $.ajax({
+        type: "GET",
+        url: '/api/VenueTrack',
+        dataType: "json",
+        success: function (data) {
+          console.log(data);
+          ec.setOption('resources', data)
+          alert("Load Events Successfully");
+        },
+        error: function (data) {
+           alert('There is a problem!!!');
+        }
+      });
     }
-  });
-}
+
+    function deleteEvent(eventInfo) {
+      var start_event =  eventInfo.start;
+      var end_event =  eventInfo.end;
+      title = "Do You want delete that event?"
+      if (confirm(title)) {
+        $.ajax({
+          type: "GET",
+          url: '/api/Reservation/delete_reservation_from_calendar',
+          data: {'event_id': eventInfo.id, 'start': start_event, 'end': end_event, 'venue': {{ venue.id }} },
+          dataType: "json",
+          success: function (data) {
+            alert("Events Successfully Deleted");
+            // toDo maybe delte only from array events?
+            goToDate();
+          },
+          error: function (data) {
+             alert('There is a problem!!!');
+          }
+        });
+      } else {
+        alert('Operation aborded');
+      }
+    }
 </script>
 
 {% endblock %}

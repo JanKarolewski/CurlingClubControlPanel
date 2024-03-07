@@ -76,6 +76,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
                 'title': reservation.title,
                 'id': reservation.id,
                 'start': reservation.from_hour,
+                'end': reservation.to_hour,
                 'resourceId': reservation.track.id,
             })
         return JsonResponse(out, safe=False)
@@ -107,12 +108,9 @@ class ReservationViewSet(viewsets.ModelViewSet):
         event = Reservation(title=str(title), from_hour=formatted_dt_start, to_hour=formatted_dt_end,
                             creator=request.user, venue=venue, reservation_date=date_str, track=track)
 
-        # ToDo How to add that? First create defult venue for club
-        # venue
-
         event.save()
-        data = {}
-        return JsonResponse(data)
+        # ToDo change return xD
+        return Response(True)
 
     @action(detail=False, methods=['GET'])
     def resize_reservation(self, request):
@@ -131,14 +129,11 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'])
     def drop_reservation(self, request):
-        print("HEHEHEHE")
         reservation_id = self.request.GET.get("reservation_id", None)
         reservation_venue = self.request.GET.get("venueId", None)
         reservation_start = self.request.GET.get("start", None)
         reservation_end = self.request.GET.get("end", None)
         resource_id = self.request.GET.get("resourceId", None)
-
-        print(resource_id)
 
         # Remove timezone info
         reservation_start = reservation_start.split('(')[0].strip()
@@ -155,14 +150,36 @@ class ReservationViewSet(viewsets.ModelViewSet):
         resized_reservation.from_hour = reservation_start_formatted
         resized_reservation.to_hour = reservation_end_formatted
         if resource_id:
-            print("here")
-            print(resource_id)
             track = VenueTrack.objects.get(id=resource_id, venue=reservation_venue)
-            print(track)
             resized_reservation.track = track
-            print(resized_reservation.track)
         resized_reservation.save()
 
+        return Response(True)
+
+    @action(detail=False, methods=['GET'])
+    def delete_reservation_from_calendar(self, request):
+        event_id = self.request.GET.get("event_id", None)
+        start = self.request.GET.get("start", None)
+        end = self.request.GET.get("end", None)
+        venue_id = self.request.GET.get("venue", None)
+
+        # Remove timezone info
+        start = start.split('(')[0].strip()
+        end = end.split('(')[0].strip()
+
+        # Parse the date string
+        start = datetime.strptime(start, "%a %b %d %Y %H:%M:%S GMT%z")
+        end = datetime.strptime(end, "%a %b %d %Y %H:%M:%S GMT%z")
+
+        start = start.strftime("%Y-%m-%d %H:%M:%S")
+        end = end.strftime("%Y-%m-%d %H:%M:%S")
+
+        # toDo change veneu field in model reservation from OneToOne to ForeginKey
+
+        reservation_data = Reservation.objects.get(id=event_id, venue=venue_id, from_hour=start, to_hour=end)
+        reservation_data.delete()
+
+        # toDo write statc file with response label
         return Response(True)
 
 
