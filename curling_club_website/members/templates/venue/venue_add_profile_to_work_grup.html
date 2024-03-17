@@ -1,9 +1,63 @@
 {% extends 'events/base.html' %}
 {% block content %}
 
+<script>
+    function call_api(url, pk) {
+        const firstName = document.getElementById("form-info-first-name").value;
+        console.log(firstName);
+        const lastName = document.getElementById("form-info-last-name").value;
+        const userName = document.getElementById("form-info-user-name").value;
+        const userId = document.getElementById("form-info-user-id").value;
+
+        const collection = [firstName, lastName, userName, userId];
+        filteredInfo = [];
+
+        for (let i= 0; i<collection.length; i++) {
+            if (collection[i].value !== '') {
+                filteredInfo = [...filteredInfo, collection[i].value];
+            }
+        }
+        if (filteredInfo.length) {
+            console.log(filteredInfo);
+            $.ajax({
+                type: "GET",
+                url: '/api/FilterForProfile/filter_user_for_venue_employee',
+                data: {'firstName': firstName, 'lastName': lastName, 'user_Name': userName, 'individualId': userId},
+                dataType: "json",
+                success: function (data) {
+                    console.log(data);
+
+                },
+                error: function (data) {
+                    alert(data.responseJSON.Failure);
+                    console.log(data);
+                }
+            });
+        } else {
+            alert('Firstly fill in fields');
+        }
+    }
+</script>
+
+<h4>Add Profile to Employees List</h4>
+
+<form>
+    <div class="form-row">
+        <div class="col">
+            <input type="text" id="form-info-first-name" style="max-width: 150px;" placeholder="First name">
+            <input type="text" id="form-info-last-name" style="max-width: 150px;" placeholder="Last name">
+            <input type="text" id="form-info-user-name" style="max-width: 150px;" placeholder="User Name">
+            <input type="text" id="form-info-user-id" style="max-width: 150px;" placeholder="User ID">
+        <button onclick="call_api()" class="btn btn-primary" type="button"
+            >Add profile as venue Employee
+        </button>
+    </div>
+</form>
+
+<br/>
 
 <h4>Employees List</h4>
-<br/><br/><br/>
+<br/>
 
 <table class="table table-striped table-hover">
     <thead>
@@ -23,7 +77,6 @@
     </tr>
     <tr>
     {% for employees in venue_employees %}
-        {{ employees }}
         <th scope="row">{{ forloop.counter }}</th>
         <td>{{ employees.user.first_name }}</td>
         <td>{{ employees.user.last_name }}</td>

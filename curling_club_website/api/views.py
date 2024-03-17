@@ -6,8 +6,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 
-from members.models import Club, Reservation, VenueTrack
-from .serializers import VenueSerializer, ClubSerializer, ReservationSerializer, VenueTrackSerializer
+from members.models import Club, Reservation, VenueTrack, Profile
+from .serializers import VenueSerializer, ClubSerializer, ReservationSerializer, VenueTrackSerializer, \
+    FilterForProfileSerializer
 from events.models import Venue
 
 from datetime import datetime
@@ -201,3 +202,38 @@ class VenueTrackViewSet(viewsets.ModelViewSet):
     serializer_class = VenueTrackSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
+
+
+class FilterForProfileViewSet(viewsets.ReadOnlyModelViewSet):
+    # not Profile but User liar ???
+    queryset = Profile.objects.all()
+    serializer_class = FilterForProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
+
+    def get_queryset(self):
+        first_name = self.request.GET.get('firstName', None)
+        last_name = self.request.GET.get('lastName', None)
+        user_name = self.request.GET.get('user_Name', None)
+        #toDo whet special_ID code in profile
+        # ID_special_indywidual_code = self.request.GET.get('individualId', None)
+
+        if not first_name and not last_name and not user_name:
+            self.queryset = []
+        if first_name:
+            self.queryset = self.queryset.filter(user__first_name__iexact=first_name)
+        if last_name:
+            self.queryset = self.queryset.filter(user__last_name__iexact=last_name)
+        if user_name:
+            self.queryset = self.queryset.filter(user__username__exact=user_name)
+        return self.queryset
+
+    @action(detail=False, methods=['GET'])
+    def filter_user_for_venue_employee(self, request):
+        if len(self.get_queryset()) > 1:
+            return Response({"Failure": "Not enought info"},  status=status.HTTP_400_BAD_REQUEST)
+        if len(self.get_queryset()) == 0:
+            return Response({"Failure": "User not exist"},  status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.serializer_class(self.get_queryset().first(), many=False)
+        return Response(serializer.data)
