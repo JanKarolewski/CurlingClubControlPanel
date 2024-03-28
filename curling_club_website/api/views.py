@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
+from django.views.generic import ListView
 from rest_framework import generics, permissions, viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -49,6 +50,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
         self.queryset = self.queryset.filter(venue=venue)
         start = self.request.GET.get('start', None)
         end = self.request.GET.get('end', None)
+        users_name_surname = self.request.GET.get('userNameSurname', None)
         user = self.request.user.profile
 
         if venue_info.administrator.pk == user.pk:
@@ -237,3 +239,30 @@ class FilterForProfileViewSet(viewsets.ReadOnlyModelViewSet):
 
         serializer = self.serializer_class(self.get_queryset().first(), many=False)
         return Response(serializer.data)
+
+
+class UpdateReservationStatus(APIView):
+    @staticmethod
+    def get_object(pk):
+        return Reservation.objects.get(pk=pk)
+
+    def patch(self, request, *args, **kwargs):
+        reservation_id = request.data.get('reservationId', None)
+        new_status = request.data.get('newStatus', None)
+
+        # 3-> cancle, 2-> accept, 4-> settle
+
+        reservation_object = self.get_object(reservation_id)
+        if new_status:
+            if new_status == 'cancel':
+                reservation_object.status = "3"
+            elif new_status == 'accept':
+                reservation_object.status = "2"
+            elif new_status == 'settle_up':
+                reservation_object.status = "4"
+
+        serializer = ReservationSerializer(reservation_object, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data)
+        return Response(data="wrong information")

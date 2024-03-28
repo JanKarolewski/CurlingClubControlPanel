@@ -1,0 +1,46 @@
+{% extends 'events/base.html' %}
+{% load bootstrap_icons %}
+{% block content %}
+
+<script>
+    function clearInputField() {
+        document.getElementById('date_from').value="";
+        document.getElementById('date_to').value="";
+        document.getElementById('userNameSurname').value="";
+    }
+</script>
+
+<form action="{% url 'club-members-reservation' %}" method="get" >
+    {% csrf_token %}
+    <input type="date" id="date_from" name="date_from" value="{{date_from}}">
+    <input type="date" id="date_to" name="date_to" value="{{date_to}}">
+    <input type="text" id="userNameSurname" name="userNameSurname" value="{{user_name_surname}}" placeholder="Name/Surname Attendees">
+    <button type="button" onclick="clearInputField()" class="btn btn-outline-secondary">Clear</button>
+    <button type="submit" value="search" class="btn btn-secondary">Search Reservations</button>
+</form>
+
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th scope="col">Created by</th>
+        <th scope="col">Reserved for</th>
+        <th scope="col">Venue</th>
+        <th scope="col">Date</th>
+        <th scope="col">Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for reservation in reservation_list %}
+    <tr>
+        <td>{{ reservation.creator }}</td>
+        <td>{{ reservation.attendees.all }}</td>
+        <td>{{ reservation.venue }}</td>
+        <td>{{ reservation.reservation_date }}</td>
+        <td>{{ reservation.get_month_display }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+
+{% endblock %}

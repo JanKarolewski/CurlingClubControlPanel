@@ -6,6 +6,7 @@ from datetime import datetime
 from .models import Event, Venue, Post
 from django.http import HttpResponseRedirect
 from .forms import VenueForm, EventForm
+from django.contrib.auth.models import Group
 
 
 def home(request, year=datetime.now().year, month=datetime.now().strftime('%B')):
@@ -56,6 +57,10 @@ def add_venue(request):
         if form.is_valid():
             form.instance.administrator = request.user
             form.save()
+            group = Group.objects.get(name="Venue admin")
+            request.user.add(group)
+            #toDo sprawdź czy działa, ogarnij czy to coś przez przypadek nie wywala a powinno
+            request.user.venue_employee = form
             return HttpResponseRedirect('/add_venue?submitted=True')
     else:
         form = VenueForm

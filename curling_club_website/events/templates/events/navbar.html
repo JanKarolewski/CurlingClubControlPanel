@@ -1,4 +1,5 @@
 {% load bootstrap_icons %}
+{% load custom_tags %}
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
@@ -48,9 +49,11 @@
           <a href="{% url 'club-admin-panel' pk=user.profile.club.id %}">
             <button class="btn btn-info" type="button">Club</button>
           </a>
-        <a href="{% url 'venue-info-panel' %}">
-          <button class="btn btn-warning" type="button">Venue</button>
-        </a>
+          {% if user|has_group:"Venue admin" %}
+            <a href="{% url 'venue-info-panel' %}">
+              <button class="btn btn-warning" type="button">Venue</button>
+            </a>
+          {% endif%}
         {% endif%}
         <a href="{% url 'logout' %}">
           <button class="btn btn-secondary" type="button">Logout</button>

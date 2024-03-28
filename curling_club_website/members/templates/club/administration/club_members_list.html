@@ -3,7 +3,7 @@
 {% block content %}
 
 
-<h4> {{ user.profile.club }} Members Panel For Users</h4>
+<h4> {{ user.profile.club }} Members Panel</h4>
 
 <table class="table table-striped">
     <thead>
@@ -33,7 +33,7 @@
                     </form>
                 </span>
                 <span>
-                    <form style="display:inline-block;" method="POST" action="{% url 'club-members-panel' %}?id={{  member.user.id }}">
+                    <form style="display:inline-block;" method="POST" action="{% url 'club-members-panel' %}?id={{ member.user.id }}">
                         {% csrf_token %}
                         <input type="hidden" name="_method" value="delete">
                         <button type="submit" class="btn btn-outline-danger" value="delete" data-toggle="tooltip" data-placement="top" title="Reject user request to join to Club">

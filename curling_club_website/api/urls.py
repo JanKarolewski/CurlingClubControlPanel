@@ -16,4 +16,5 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('test', views.check, name="check"),
     path('logout/', Logout.as_view()),
+    path('update_reservation_status/', views.UpdateReservationStatus.as_view()),
 ]

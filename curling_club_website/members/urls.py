@@ -1,6 +1,5 @@
 from django.urls import path, include, re_path
 
-from api.views import ClubViewSet
 from . import views
 
 urlpatterns = [
@@ -11,6 +10,7 @@ urlpatterns = [
     path('register_club', views.register_club, name='register-club'),
     path('club_info_panel/<int:club>', views.club_info_panel, name='club-info-panel'),
     path('club_admin_panel/<int:pk>', views.ClubView.as_view(), name='club-admin-panel'),
+    path('club-members-reservation', views.ClubMembersReservation.as_view(), name='club-members-reservation'),
 
     # venue (Ice Arena) administration
     path('venue_info_panel', views.venue_info_panel, name='venue-info-panel'),
@@ -27,6 +27,8 @@ urlpatterns = [
     path('edit-venue-track/<int:track_id>', views.edit_venue_track, name='edit-venue-track'),
     path('delete-venue-track/<int:track_id>', views.delete_venue_track, name='delete-venue-track'),
     path('all-venues-list', views.all_venues_list, name='all-venues-list'),
+    path('add-profile-for-work-group/<int:venue_id>', views.add_profile_for_work_group, name='add-profile-for-work-group'),
+    path('venue-reservation-list', views.VenueReservation.as_view(), name='venue-reservation-list'),
 
 
     # user administration
@@ -35,8 +37,6 @@ urlpatterns = [
     path('profile_panel', views.profile_panel, name='profile-panel'),
     path('update_user', views.update_user, name='update-user'),
     path('update_profile', views.update_profile, name='update-profile'),
-    path('add-profile-for-work-group/<int:venue_id>', views.add_profile_for_work_group, name='add-profile-for-work-group'),
-
 
     # ice reservation calendar
     # path for calendar as normal user

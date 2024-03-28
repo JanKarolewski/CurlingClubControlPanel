@@ -139,11 +139,10 @@ class Reservation(models.Model):
     to_hour = models.DateTimeField(blank=True, null=True)
     reservation_date = models.DateField(blank=True, null=True)
     venue = models.ForeignKey(Venue, blank=True, null=True, on_delete=models.SET_NULL, related_name='Reservation_venue')
-    #zmienic na inna nazwe, co to za głupota xD
-    month = models.CharField(max_length=2, choices=Status.choices, default=Status.Waiting_for_confirmation)
+    status = models.CharField(max_length=2, choices=Status.choices, default=Status.Waiting_for_confirmation)
 
     def __str__(self):
-        return str(self.title) + " | " + str(self.creator) + " | " + str(self.month)
+        return str(self.title) + " | " + str(self.creator) + " | " + str(self.status)
 
     @property
     def default_venue_track(self):

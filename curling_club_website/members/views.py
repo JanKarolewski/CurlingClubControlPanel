@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import User
 from django.db import IntegrityError
+from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
@@ -128,6 +129,7 @@ def update_profile(request):
         return redirect('home')
 
 
+# toDo widok źle nazwany, powinien sie nazywać "lista pracowników"
 def add_profile_for_work_group(request, venue_id):
     # print(Venue.objects.filter(id=venue_id).values('administrator', 'employees'))
     venue_info = Venue.objects.filter(id=venue_id).values('administrator').first()
@@ -169,7 +171,6 @@ class ClubView(DetailView):
 
     def get_object(self, *args, **kwargs):
         obj = Club.objects.get(id=self.request.user.profile.club.id)
-        print(obj)
         return obj
 
 
@@ -182,7 +183,6 @@ class MembersClubView(ListView):
 
     def get_queryset(self):
         qs_club_member = super().get_queryset().filter(club=self.club_id)
-        print(qs_club_member)
         return qs_club_member
 
     def dispatch(self, *args, **kwargs):
@@ -211,25 +211,97 @@ class MembersClubView(ListView):
         return redirect('club-members-panel')
 
 
+class ClubMembersReservation(ListView):
+    model = Reservation
+    context_object_name = 'reservation_list'
+    template_name = 'club/administration/club_members_reservation.html'
+    date_from = None
+    date_to = None
+    user_name_surname = ""
+    # todo create pagination
+    # paginate_by = 30
+
+    def get_queryset(self):
+        self.date_from = self.request.GET.get('date_from', None)
+        self.date_to = self.request.GET.get('date_to', None)
+        self.user_name_surname = self.request.GET.get('userNameSurname', None)
+        club = self.request.user.profile.club
+
+        qs_reservation = super().get_queryset().filter(attendees__profile__club=club)
+        if self.date_from:
+            start = datetime.strptime(self.date_from, "%Y-%m-%d")
+            qs_reservation = qs_reservation.filter(reservation_date__gte=start)
+        if self.date_to:
+            end = datetime.strptime(self.date_to, "%Y-%m-%d")
+            qs_reservation = qs_reservation.filter(reservation_date__gte=end)
+        if self.user_name_surname:
+            qs_reservation = qs_reservation.filter(Q(attendees__username__exact=self.user_name_surname) |
+                                                   Q(attendees__first_name__exact=self.user_name_surname) |
+                                                   Q(attendees__last_name__exact=self.user_name_surname))
+        return qs_reservation
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['date_from'] = self.date_from
+        data['date_to'] = self.date_to
+        data['user_name_surname'] = self.user_name_surname
+        return data
+
+
+class VenueReservation(ListView):
+    model = Reservation
+    context_object_name = 'reservation_list'
+    template_name = 'venue/ice_reservation/venu_reservation_list.html'
+    date_from = None
+    date_to = None
+    user_name_surname = "ddsfds"
+    # todo create pagination
+    # paginate_by = 30
+
+    def get_queryset(self):
+        self.date_from = self.request.GET.get('date_from', None)
+        self.date_to = self.request.GET.get('date_to', None)
+        self.user_name_surname = self.request.GET.get('userNameSurname', None)
+        venue = self.request.user.profile.venue_employee
+        qs_reservation = super().get_queryset().filter(venue=venue)
+        if self.date_from:
+            start = datetime.strptime(self.date_from, "%Y-%m-%d")
+            qs_reservation = qs_reservation.filter(reservation_date__gte=start)
+        if self.date_to:
+            end = datetime.strptime(self.date_to, "%Y-%m-%d")
+            qs_reservation = qs_reservation.filter(reservation_date__gte=end)
+        if self.user_name_surname:
+            print(self.user_name_surname)
+            qs_reservation = qs_reservation.filter(Q(attendees__username__exact=self.user_name_surname) |
+                                                   Q(attendees__first_name__exact=self.user_name_surname) |
+                                                   Q(attendees__last_name__exact=self.user_name_surname))
+        return qs_reservation
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['date_from'] = self.date_from
+        data['date_to'] = self.date_to
+        data['user_name_surname'] = self.user_name_surname
+        return data
+
+
 def venue_info_panel(request):
+    #toDo for remplyee query
     venue = Venue.objects.get(administrator=request.user)
-
-    print(request.user.profile)
-
     return render(request, 'venue/venue_control_panel.html', {
         'venue': venue
     })
 
 
 def venue_calendar_reservation_view(request):
-    venue_ice_schedule = VenueIceOpenHours.objects.filter(venue=request.user.profile.venue)
+    venue_ice_schedule = VenueIceOpenHours.objects.filter(venue=request.user.profile.venue_employee)
     return render(request, 'venue/ice_reservation/venue_reseravion_control_panel.html',
                   {'venue_ice_schedule': venue_ice_schedule})
 
 
 def edit_ice_availability_schedule(request, day_name):
     if request.user.is_authenticated:
-        venue_ice_open_hours = VenueIceOpenHours.objects.get(venue=request.user.profile.venue, weekday=day_name)
+        venue_ice_open_hours = VenueIceOpenHours.objects.get(venue=request.user.profile.venue_employee, weekday=day_name)
         form = VenueIceOpenHoursForm(request.POST or None, instance=venue_ice_open_hours)
         if form.is_valid():
             form.save()
@@ -244,7 +316,7 @@ def edit_ice_availability_schedule(request, day_name):
 
 def delete_ice_availability_schedule(request, day_name):
     if request.user.is_authenticated:
-        venue_ice_open_hours = VenueIceOpenHours.objects.get(venue=request.user.profile.venue, weekday=day_name)
+        venue_ice_open_hours = VenueIceOpenHours.objects.get(venue=request.user.profile.venue_employee, weekday=day_name)
         venue_ice_open_hours.delete()
         messages.success(request, "Wykreślono dane o dostępności lodu")
         return redirect('venue-calendar-reservation-view')
@@ -255,7 +327,7 @@ def delete_ice_availability_schedule(request, day_name):
 
 def venue_ice_availability_schedule(request):
     if request.user.is_authenticated:
-        user_venue = request.user.profile.venue
+        user_venue = request.user.profile.venue_employee
         form = VenueIceOpenHoursForm(request.POST or None)
         if form.is_valid():
             form.instance.venue = user_venue
@@ -286,7 +358,7 @@ def create_ice_reservation(request, venue_id, day=datetime.now().day, month=date
 
 ########################### VENUE TRACK ###########################
 def venue_tracks_view(request):
-    venue = request.user.profile.venue
+    venue = request.user.profile.venue_employee
     venue_track_data = VenueTrack.objects.filter(venue=venue)
     return render(request, 'venue/track_admin/venue_tracks_view.html', {'venue': venue,
                                                                         'venue_track_data': venue_track_data})
@@ -294,7 +366,7 @@ def venue_tracks_view(request):
 
 def venue_track_form(request):
     if request.user.is_authenticated:
-        user_venue = request.user.profile.venue
+        user_venue = request.user.profile.venue_employee
         form = VenueTrackForm(request.POST or None)
         if form.is_valid() and user_venue:
             form.instance.venue = user_venue
@@ -314,7 +386,7 @@ def all_venues_list(request):
 
 def edit_venue_track(request, track_id):
     if request.user.is_authenticated:
-        venue_track_form_info = VenueTrack.objects.get(venue=request.user.profile.venue, id=track_id)
+        venue_track_form_info = VenueTrack.objects.get(venue=request.user.profile.venue_employee, id=track_id)
         form = VenueTrackForm(request.POST or None, instance=venue_track_form_info)
         if form.is_valid():
             form.save()
@@ -329,7 +401,7 @@ def edit_venue_track(request, track_id):
 
 def delete_venue_track(request, track_id):
     if request.user.is_authenticated:
-        venue_track_query = VenueTrack.objects.filter(venue=request.user.profile.venue)
+        venue_track_query = VenueTrack.objects.filter(venue=request.user.profile.venue_employee)
         if venue_track_query.count() > 1:
             venue_track_to_delete = venue_track_query.get(id=track_id)
             venue_track_to_delete.delete()
