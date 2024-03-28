@@ -14,6 +14,7 @@ from events.models import Venue
 
 from datetime import datetime
 
+
 # class VenueViewSet1(generics.CreateAPIView):
 #     queryset = Venue.objects.all()
 #     serializer_class = VenueSerializer
@@ -217,7 +218,7 @@ class FilterForProfileViewSet(viewsets.ReadOnlyModelViewSet):
         first_name = self.request.GET.get('firstName', None)
         last_name = self.request.GET.get('lastName', None)
         user_name = self.request.GET.get('user_Name', None)
-        #toDo whet special_ID code in profile
+        # toDo whet special_ID code in profile
         # ID_special_indywidual_code = self.request.GET.get('individualId', None)
 
         if not first_name and not last_name and not user_name:
@@ -233,12 +234,30 @@ class FilterForProfileViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['GET'])
     def filter_user_for_venue_employee(self, request):
         if len(self.get_queryset()) > 1:
-            return Response({"Failure": "Not enought info"},  status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Failure": "Not enought info"}, status=status.HTTP_400_BAD_REQUEST)
         if len(self.get_queryset()) == 0:
-            return Response({"Failure": "User not exist"},  status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Failure": "User not exist"}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.serializer_class(self.get_queryset().first(), many=False)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['GET'])
+    def add_user_for_venue_employee(self, request):
+        first_name = self.request.GET.get('firstName', None)
+        last_name = self.request.GET.get('lastName', None)
+        user_name = self.request.GET.get('user_Name', None)
+
+        # for Profile
+        profile_new_employee = Profile.objects.get(user__first_name__exact=first_name, user__last_name__exact=last_name,
+                                   user__username__exact=user_name)
+        profile_new_employee.venue_employee = self.request.user.profile.venue_employee
+        profile_new_employee.save()
+
+        # for Venue
+        venue = self.request.user.profile.venue_employee
+        venue.employees.add(profile_new_employee)
+        venue.save()
+        return Response({"Correct": "Add user to word group"}, status=status.HTTP_201_CREATED)
 
 
 class UpdateReservationStatus(APIView):

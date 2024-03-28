@@ -4,7 +4,6 @@
 <script>
     function call_api(url, pk) {
         const firstName = document.getElementById("form-info-first-name").value;
-        console.log(firstName);
         const lastName = document.getElementById("form-info-last-name").value;
         const userName = document.getElementById("form-info-user-name").value;
         const userId = document.getElementById("form-info-user-id").value;
@@ -13,30 +12,50 @@
         filteredInfo = [];
 
         for (let i= 0; i<collection.length; i++) {
-            if (collection[i].value !== '') {
+            if (collection[i].length != 0) {
                 filteredInfo = [...filteredInfo, collection[i].value];
             }
         }
         if (filteredInfo.length) {
-            console.log(filteredInfo);
             $.ajax({
                 type: "GET",
                 url: '/api/FilterForProfile/filter_user_for_venue_employee',
                 data: {'firstName': firstName, 'lastName': lastName, 'user_Name': userName, 'individualId': userId},
                 dataType: "json",
                 success: function (data) {
-                    console.log(data);
-
+                    let text = "Czy chcesz dodać usera "+ data["first_name"]+" "+data["last_name"]+" "+data["username"]+" do grupy pracowniczej?";
+                    if (confirm(text) == true) {
+                        text = "You pressed OK!";
+                        add_user(data);
+                    } else {
+                        text = "You canceled!";
+                    }
                 },
                 error: function (data) {
                     alert(data.responseJSON.Failure);
-                    console.log(data);
                 }
             });
         } else {
             alert('Firstly fill in fields');
         }
     }
+
+    function add_user(userInfo) {
+        $.ajax({
+            type: "GET",
+            url: '/api/FilterForProfile/add_user_for_venue_employee',
+            data: {'firstName': userInfo['first_name'], 'lastName': userInfo['last_name'], 'user_Name': userInfo['username']},
+            dataType: "json",
+            success: function (data) {
+                window.alert(data['Correct']);
+                location.reload();
+            },
+            error: function (data) {
+                window.alert("Error");
+            }
+        });
+    }
+
 </script>
 
 <h4>Add Profile to Employees List</h4>
