@@ -17,6 +17,7 @@
             }
         }
         if (filteredInfo.length) {
+            showLoader();
             $.ajax({
                 type: "GET",
                 url: '/api/FilterForProfile/filter_user_for_venue_employee',
@@ -24,6 +25,7 @@
                 dataType: "json",
                 success: function (data) {
                     let text = "Czy chcesz dodać usera "+ data["first_name"]+" "+data["last_name"]+" "+data["username"]+" do grupy pracowniczej?";
+                    hideLoader();
                     if (confirm(text) == true) {
                         text = "You pressed OK!";
                         add_user(data);
@@ -41,6 +43,7 @@
     }
 
     function add_user(userInfo) {
+        showLoader();
         $.ajax({
             type: "GET",
             url: '/api/FilterForProfile/add_user_for_venue_employee',
@@ -49,9 +52,11 @@
             success: function (data) {
                 window.alert(data['Correct']);
                 location.reload();
+                hideLoader();
             },
             error: function (data) {
                 window.alert("Error");
+                hideLoader();
             }
         });
     }
