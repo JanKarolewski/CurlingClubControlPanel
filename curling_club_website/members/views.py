@@ -129,6 +129,12 @@ def update_profile(request):
         return redirect('home')
 
 
+@login_required
+def user_reservations_list(request):
+    reservations = Reservation.objects.filter(attendees__in=[request.user.profile.pk])
+    return render(request, 'authenticate/user_reservations_list.html', {'reservations': reservations})
+
+
 # toDo widok źle nazwany, powinien sie nazywać "lista pracowników"
 def add_profile_for_work_group(request, venue_id):
     # print(Venue.objects.filter(id=venue_id).values('administrator', 'employees'))

@@ -10,7 +10,7 @@
     }
 </script>
 
-<form action="{% url 'club-members-reservation' %}" method="get" >
+<form action="{% url 'club-members-reservation' %}" method="get" onsubmit="showLoader()">
     {% csrf_token %}
     <input type="date" id="date_from" name="date_from" value="{{date_from}}">
     <input type="date" id="date_to" name="date_to" value="{{date_to}}">
@@ -33,7 +33,11 @@
     {% for reservation in reservation_list %}
     <tr>
         <td>{{ reservation.creator }}</td>
-        <td>{{ reservation.attendees.all }}</td>
+         <td>
+            {% for attendee in reservation.attendees.all %}
+                ({{ forloop.counter }}) {{ attendee }}
+            {% endfor %}
+        </td>
         <td>{{ reservation.venue }}</td>
         <td>{{ reservation.reservation_date }}</td>
         <td>{{ reservation.get_month_display }}</td>

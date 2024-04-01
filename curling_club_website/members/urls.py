@@ -37,6 +37,7 @@ urlpatterns = [
     path('profile_panel', views.profile_panel, name='profile-panel'),
     path('update_user', views.update_user, name='update-user'),
     path('update_profile', views.update_profile, name='update-profile'),
+    path('user-reservations-list', views.user_reservations_list, name='user-reservations-list'),
 
     # ice reservation calendar
     # path for calendar as normal user

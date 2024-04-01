@@ -16,7 +16,7 @@
          data: {'reservationId': reservationId, 'newStatus': newStatus},
          dataType: "json",
          success: function (data) {
-            alert("Status changed Successfully");
+<!--            alert("Status changed Successfully");-->
             location.reload();
          },
          error: function (data) {
@@ -27,7 +27,7 @@
     }
 </script>
 
-<form action="{% url 'club-members-reservation' %}" method="get" >
+<form action="{% url 'club-members-reservation' %}" method="get" onsubmit="showLoader()">
     {% csrf_token %}
     <input type="date" id="date_from" name="date_from" value="{{date_from}}">
     <input type="date" id="date_to" name="date_to" value="{{date_to}}">
@@ -51,20 +51,24 @@
     {% for reservation in reservation_list %}
     <tr>
         <td>{{ reservation.creator }}</td>
-        <td>{{ reservation.attendees.all }}</td>
+        <td>
+            {% for attendee in reservation.attendees.all %}
+                ({{ forloop.counter }}) {{ attendee }}
+            {% endfor %}
+        </td>
         <td>{{ reservation.venue }}</td>
         <td>{{ reservation.reservation_date }}</td>
         <td>{{ reservation.get_status_display }}</td>
         <td>
-            <button type="submit" class="btn btn-outline-danger" onclick="changeReservationStatus( {{reservation.pk}}, 'cancel')" value="cacle_reservation" data-toggle="tooltip" data-placement="top" title="FILL DESCRIPTION">
+            <button type="submit" class="btn btn-outline-danger" onclick="changeReservationStatus( {{reservation.pk}}, 'cancel'); showLoader();" value="cacle_reservation" data-toggle="tooltip" data-placement="top" title="FILL DESCRIPTION">
                 {% bs_icon 'dash-circle' %}
             </button>
 
-            <button type="submit" class="btn btn-outline-secondary" onclick="changeReservationStatus({{reservation.pk}}, 'accept')" value="confirm_reservation" data-toggle="tooltip" data-placement="top" title="FILL DESCRIPTION">
+            <button type="submit" class="btn btn-outline-secondary" onclick="changeReservationStatus({{reservation.pk}}, 'accept'); showLoader();" value="confirm_reservation" data-toggle="tooltip" data-placement="top" title="FILL DESCRIPTION">
                 {% bs_icon 'check-circle-fill' %}
             </button>
 
-            <button type="submit" class="btn btn-outline-info" onclick="changeReservationStatus({{reservation.pk}}, 'settle_up')" value="pay_reservation" data-toggle="tooltip" data-placement="top" title="FILL DESCRIPTION">
+            <button type="submit" class="btn btn-outline-info" onclick="changeReservationStatus({{reservation.pk}}, 'settle_up'); showLoader();" value="pay_reservation" data-toggle="tooltip" data-placement="top" title="FILL DESCRIPTION">
                 {% bs_icon 'cash-stack' %}
             </button>
         </td>
