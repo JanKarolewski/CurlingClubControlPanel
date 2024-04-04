@@ -29,7 +29,7 @@
            if (title) {
              $.ajax({
                  type: "GET",
-                 url: '/api/Reservation/add_reservation',
+                 url: '/api/ReservationForCustomerViewSet/add_reservation',
                  data: {'venueId': {{venue.id}}, 'start': start_par, 'end': end_par, 'title': title, 'resourceId': resource},
                  dataType: "json",
                  success: function (data) {
@@ -75,7 +75,7 @@
 
         $.ajax({
           type: "GET",
-          url: '/api/Reservation/reservation_for_calendar',
+          url: '/api/ReservationForCustomer/reservation_for_calendar',
           data: {'start': date_basic, 'end': date_basic, 'venue': {{ venue.id }} },
           dataType: "json",
           success: function (data) {
@@ -95,7 +95,7 @@
 
       $.ajax({
         type: "GET",
-        url: '/api/Reservation/reservation_for_calendar?venue={{ venue.id }}',
+        url: '/api/ReservationForCustomer/reservation_for_calendar?venue={{ venue.id }}',
         data: {'start': date_basic, 'end': date_basic},
         dataType: "json",
         success: function (data) {
@@ -123,30 +123,6 @@
            alert('There is a problem!!!');
         }
       });
-    }
-
-    function deleteEvent(eventInfo) {
-      var start_event =  eventInfo.start;
-      var end_event =  eventInfo.end;
-      title = "Do You want delete that event?"
-      if (confirm(title)) {
-        $.ajax({
-          type: "GET",
-          url: '/api/Reservation/delete_reservation_from_calendar',
-          data: {'event_id': eventInfo.id, 'start': start_event, 'end': end_event, 'venue': {{ venue.id }} },
-          dataType: "json",
-          success: function (data) {
-            alert("Events Successfully Deleted");
-            // toDo maybe delte only from array events?
-            goToDate();
-          },
-          error: function (data) {
-             alert('There is a problem!!!');
-          }
-        });
-      } else {
-        alert('Operation aborded');
-      }
     }
 
 </script>

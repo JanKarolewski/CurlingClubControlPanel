@@ -13,7 +13,7 @@ from .serializers import VenueSerializer, ClubSerializer, ReservationSerializer,
 from events.models import Venue
 
 from datetime import datetime
-
+from itertools import chain
 
 # class VenueViewSet1(generics.CreateAPIView):
 #     queryset = Venue.objects.all()
@@ -36,7 +36,87 @@ class VenueViewSet2(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
+class ReservationForCustomerViewSet(viewsets.ModelViewSet):
+    # viewSet for only Customer/User
+    queryset = Reservation.objects.all()
+    serializer_class = ReservationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
+
+    def get_queryset(self):
+        print("To jest to")
+        venue = self.request.GET.get('venue', None)
+        venue_info = Venue.objects.get(id=venue)
+        self.queryset = self.queryset.filter(venue=venue_info)
+        user = self.request.user.profile
+        start = self.request.GET.get('start', None)
+        end = self.request.GET.get('end', None)
+
+        if start:
+            start = datetime.strptime(start, "%Y-%m-%d")
+            self.queryset = self.queryset.filter(reservation_date__gte=start)
+        if end:
+            end = datetime.strptime(end, "%Y-%m-%d")
+            self.queryset = self.queryset.filter(reservation_date__lte=end)
+
+        with_user = (self.queryset.values('from_hour', 'to_hour', 'track', 'attendees', 'id', 'title').
+                     filter(attendees__in=[user.pk]))
+        with_out_user = self.queryset.values('from_hour', 'to_hour', 'track', 'id').exclude(attendees__in=[user.pk])
+        model_combination = list(chain(with_user, with_out_user))
+        self.queryset = model_combination
+
+        return self.queryset
+
+    @action(detail=False, methods=['GET'])
+    def reservation_for_calendar(self, request):
+        # Get all club reservation for calendar in 2 cases (your reservation, or if admin venue all reservation)
+        print("nowy endpoint")
+        out = []
+        for reservation in self.get_queryset():
+            out.append({
+                'title':  reservation['title'] if 'title' in reservation else 'LODOWISKO ZAREZERWOWANE',
+                'id': reservation["id"],# is nessesary?
+                # write sth for atendees
+                'start': reservation["from_hour"],
+                'end': reservation["to_hour"],
+                'resourceId': reservation["track"],
+            })
+        return JsonResponse(out, safe=False)
+        # serializer = self.get_serializer(self.get_queryset(), many=True)
+        # return Response(serializer.data)
+
+    @action(detail=False, methods=['GET'])
+    def add_reservation(self, request):
+        start = self.request.GET.get("start", None)
+        end = self.request.GET.get("end", None)
+        title = self.request.GET.get("title", None)
+        resourceId = self.request.GET.get("resourceId", None)
+        venueId = self.request.GET.get("venueId", None)
+
+        cleaned_js_start_time = start.split('(')[0].strip()
+        cleaned_js_end_time = end.split('(')[0].strip()
+        # Sparsowanie czasu do obiektu datetime
+        dt_start = datetime.strptime(cleaned_js_start_time, "%a %b %d %Y %H:%M:%S GMT%z")
+        dt_end = datetime.strptime(cleaned_js_end_time, "%a %b %d %Y %H:%M:%S GMT%z")
+
+        # Sformatowanie czasu do YYYY-MM-DD HH:MM
+        formatted_dt_start = dt_start.strftime("%Y-%m-%d %H:%M:%S")
+        formatted_dt_end = dt_end.strftime("%Y-%m-%d %H:%M:%S")
+        date_str, time_str = formatted_dt_start.split(" ")
+
+        venue = Venue.objects.get(id=venueId)
+        track = VenueTrack.objects.get(id=resourceId)
+
+        event = Reservation(title=str(title), from_hour=formatted_dt_start, to_hour=formatted_dt_end,
+                            creator=request.user, venue=venue, reservation_date=date_str, track=track)
+
+        event.save()
+        # ToDo change return xD
+        return Response(True)
+
+
 class ReservationViewSet(viewsets.ModelViewSet):
+    # viewSet for only AdminVenue/Employee
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -55,12 +135,14 @@ class ReservationViewSet(viewsets.ModelViewSet):
         user = self.request.user.profile
 
         if venue_info.administrator.pk == user.pk:
+            #it is wrong ideal
             # ToDo or user is venue worker
             is_venue_admin_or_worker = True
             print(is_venue_admin_or_worker)
         else:
             self.queryset = self.queryset.filter(attendees__in=[user.pk])
-            self.queryset = self.queryset.filter(creator=user.pk)
+            # creator? for what?
+            # self.queryset = self.queryset.filter(creator=user.pk)
 
         if start:
             start = datetime.strptime(start, "%Y-%m-%d")
