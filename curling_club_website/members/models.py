@@ -36,6 +36,7 @@ class Profile(models.Model):
         ("Profile_rejected", "Profile rejected")
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    friends = models.ManyToManyField(User, related_name='profile_friends', blank=True)
     phone_number = PhoneNumberField(null=True, blank=True)
     club = models.ForeignKey(Club, null=True, blank=True, on_delete=models.CASCADE)
     photo_profile = models.ImageField(blank=True, null=True, upload_to='user_photo_profile/', default='uploads/OIP.jpg')
@@ -59,6 +60,14 @@ class Profile(models.Model):
 
     def __str__(self):
         return str(self.user.username) + " | " + str(self.club)
+
+
+class FriendRequest(models.Model):
+    from_user = models.ForeignKey(User, related_name='from_user', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(User, related_name='to_user', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.from_user) + " -> " + str(self.to_user)
 
 
 class VenueIceOpenHours(models.Model):

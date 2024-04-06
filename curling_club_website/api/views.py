@@ -135,7 +135,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
         user = self.request.user.profile
 
         if venue_info.administrator.pk == user.pk:
-            #it is wrong ideal
+            # it is wrong idea
             # ToDo or user is venue worker
             is_venue_admin_or_worker = True
             print(is_venue_admin_or_worker)

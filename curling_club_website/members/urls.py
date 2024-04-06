@@ -38,6 +38,10 @@ urlpatterns = [
     path('update_user', views.update_user, name='update-user'),
     path('update_profile', views.update_profile, name='update-profile'),
     path('user-reservations-list', views.user_reservations_list, name='user-reservations-list'),
+    path('user-friends-list', views.user_friends_list, name='user-friends-list'),
+    path('send-friend-request', views.send_friend_request, name='send-friend-request'),
+    path('accept-friend-request', views.accept_friend_request, name='accept-friend-request'),
+    path('remove-from-friend-list', views.remove_from_friend_list, name='remove-from-friend-list'),
 
     # ice reservation calendar
     # path for calendar as normal user

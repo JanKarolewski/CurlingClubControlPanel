@@ -200,6 +200,12 @@
         alert('Operation aborded');
       }
     }
+    $('body').on('click', 'button.ec-button.ec-next', function() {
+        goToDate();
+    });
+    $('body').on('click', 'button.ec-button.ec-prev', function() {
+        goToDate();
+    });
 </script>
 
 {% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'events/base.html' %}
+{% block content %}
+
+
+<h4>User Friends List</h4>
+Add user by ID
+
+<form method="GET" action="{% url 'send-friend-request' %}">
+    {% csrf_token %}
+    <input type="text" id="user_id" name="user_id">
+    <button type="submit">Send add to friend request</button>
+</form>
+
+<br>
+
+{% if add_friends_request %}
+    <h4>Accept friend request list</h4>
+    <table class="table table-striped table-hover">
+        <thead>
+        <tr>
+            <th scope="row">#</th>
+            <th scope="col">User Name</th>
+            <th scope="col">Name</th>
+            <th scope="col">Surname</th>
+            <th scope="col">Actual Club</th>
+            <th scope="col">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for friends_request in add_friends_request %}
+        <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ friends_request.from_user.username }}</td>
+            <td>{{ friends_request.from_user.first_name }}</td>
+            <td>{{ friends_request.from_user.last_name }}</td>
+            <td>{{ friends_request.from_user.profile.club|default_if_none:"--" }}</td>
+            <td>
+                <form method="GET" action="{% url 'accept-friend-request' %}">
+                    {% csrf_token %}
+                    <button class="btn btn-success" value="{{ friends_request.pk }}" name="user_accept_id" type="submit">Accept</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
+{% if user_friends.all %}
+<h4>Your friends</h4>
+    <table class="table table-striped table-hover">
+        <thead>
+        <tr>
+            <th scope="row">#</th>
+            <th scope="col">User Name</th>
+            <th scope="col">Name</th>
+            <th scope="col">Surname</th>
+            <th scope="col">Actual Club</th>
+            <th scope="col">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for user_friend in user_friends.all %}
+        <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ user_friend.username }}</td>
+            <td>{{ user_friend.first_name }}</td>
+            <td>{{ user_friend.last_name }}</td>
+            <td>{{ user_friend.club|default_if_none:"--" }} {{ user_friend.pk }}</td>
+            <td>
+                <form method="GET" action="{% url 'remove-from-friend-list' %}">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-danger" value="{{ user_friend.pk }}" name="user_to_remove_id" type="submit">Remove From Friends List</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% endblock %}

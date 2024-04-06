@@ -20,7 +20,7 @@ from datetime import datetime
 
 from events.models import Venue
 from members.forms import RegisterUserForm, RegisterClubForm, ProfileForm, VenueIceOpenHoursForm, VenueTrackForm
-from members.models import Profile, Club, VenueIceOpenHours, Reservation, VenueTrack
+from members.models import Profile, Club, VenueIceOpenHours, Reservation, VenueTrack, FriendRequest
 
 
 def login_user(request):
@@ -419,3 +419,52 @@ def delete_venue_track(request, track_id):
     else:
         messages.error(request, "Musisz być zalogowanym")
         return redirect('home')
+
+
+def user_friends_list(request):
+    user_friends = request.user.profile.friends.all()
+    add_friends_request = FriendRequest.objects.filter(to_user=request.user)
+    return render(request, 'authenticate/user_friends_list.html', {'user_friends': user_friends,
+                                                                   'add_friends_request': add_friends_request})
+
+
+def send_friend_request(request):
+    user_id = request.GET.get('user_id', None)
+    if request.user.id == int(user_id):
+        messages.error(request, "Błąd")
+        return redirect('user-friends-list')
+    to_user = User.objects.filter(id=user_id).first()
+    from_user = request.user
+    if to_user:
+        friend_request, created = FriendRequest.objects.get_or_create(from_user=from_user, to_user=to_user)
+        if created:
+            messages.success(request, "Wsyłano zapytanie")
+            return redirect('user-friends-list')
+        else:
+            messages.error(request, "Zapytanie było już wysłane")
+            return redirect('user-friends-list')
+    else:
+        messages.error(request, "Brak wskazanego usera")
+        return redirect('user-friends-list')
+
+
+def accept_friend_request(request):
+    user_accepted_id = request.GET.get('user_accept_id', None)
+    friend_request = FriendRequest.objects.get(id=user_accepted_id)
+    if friend_request.to_user == request.user:
+        friend_request.to_user.profile.friends.add(friend_request.from_user)
+        friend_request.from_user.profile.friends.add(friend_request.to_user)
+        friend_request.delete()
+        messages.error(request, "Friend request accepted")
+        return redirect('user-friends-list')
+    else:
+        messages.error(request, "friend request not accepted")
+        return redirect('user-friends-list')
+
+
+def remove_from_friend_list(request):
+    user_to_remove_id = request.GET.get('user_to_remove_id', None)
+    user_to_remove = User.objects.get(pk=user_to_remove_id)
+    request.user.profile.friends.remove(user_to_remove)
+    messages.error(request, "Remove user from friends list")
+    return redirect('user-friends-list')
