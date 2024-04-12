@@ -19,7 +19,8 @@ from calendar import HTMLCalendar
 from datetime import datetime
 
 from events.models import Venue
-from members.forms import RegisterUserForm, RegisterClubForm, ProfileForm, VenueIceOpenHoursForm, VenueTrackForm
+from members.forms import RegisterUserForm, RegisterClubForm, ProfileForm, VenueIceOpenHoursForm, VenueTrackForm, \
+    AppendAttendeesToReservationForm
 from members.models import Profile, Club, VenueIceOpenHours, Reservation, VenueTrack, FriendRequest
 
 
@@ -132,6 +133,7 @@ def update_profile(request):
 @login_required
 def user_reservations_list(request):
     reservations = Reservation.objects.filter(attendees__in=[request.user.profile.pk])
+    print(reservations)
     return render(request, 'authenticate/user_reservations_list.html', {'reservations': reservations})
 
 
@@ -468,3 +470,16 @@ def remove_from_friend_list(request):
     request.user.profile.friends.remove(user_to_remove)
     messages.error(request, "Remove user from friends list")
     return redirect('user-friends-list')
+
+
+def append_attendees_to_reservation(request):
+    reservations_info = request.GET.get('reservations_info', None)
+    reservation_data = Reservation.objects.get(id=reservations_info)
+    form = AppendAttendeesToReservationForm(instance=reservation_data, current_user_friendlist=reservation_data.creator_friends)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Zaktualizowano dane o uczetnikach rezerwacji")
+        return redirect('venue-tracks-view')
+    return render(request, 'authenticate/append_attendees_to_reservation.html',
+                  {'form': form, 'reservation_date': reservation_data.reservation_date,
+                   'reservation_from_hour': reservation_data.from_hour, 'reservation_to_hour': reservation_data.to_hour})

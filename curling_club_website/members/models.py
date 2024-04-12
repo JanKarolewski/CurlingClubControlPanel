@@ -142,8 +142,9 @@ class Reservation(models.Model):
     title = models.CharField(blank=True, null=True, max_length=25)
     note = models.CharField(blank=True, null=True, max_length=255)
     track = models.ForeignKey(VenueTrack, on_delete=models.CASCADE, related_name='Reservation_track', default="")
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)
-    attendees = models.ManyToManyField(User, blank=True, null=True, related_name='attendees')
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='creator')
+    # czy to nie powinno być po prostu ForeignKey profile_friends?
+    attendees = models.ManyToManyField(User, blank=True, null=True, related_name='attendees_reservation')
     from_hour = models.DateTimeField(blank=True, null=True)
     to_hour = models.DateTimeField(blank=True, null=True)
     reservation_date = models.DateField(blank=True, null=True)
@@ -157,3 +158,9 @@ class Reservation(models.Model):
     def default_venue_track(self):
         default_track = VenueTrack.object.filter(venue=self.venue)[0]
         return default_track
+
+    @property
+    def creator_friends(self):
+        creator_friends = User.objects.get(id=self.creator.id)
+        creator_friends = creator_friends.profile.friends.all()
+        return creator_friends

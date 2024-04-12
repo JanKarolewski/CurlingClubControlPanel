@@ -42,6 +42,7 @@ urlpatterns = [
     path('send-friend-request', views.send_friend_request, name='send-friend-request'),
     path('accept-friend-request', views.accept_friend_request, name='accept-friend-request'),
     path('remove-from-friend-list', views.remove_from_friend_list, name='remove-from-friend-list'),
+    path('append-attendees-to-reservation', views.append_attendees_to_reservation, name='append-attendees-to-reservation'),
 
     # ice reservation calendar
     # path for calendar as normal user

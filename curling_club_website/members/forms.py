@@ -5,7 +5,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberPrefixWidget
 from django import forms
 
-from members.models import Club, Profile, VenueIceOpenHours, VenueTrack
+from members.models import Club, Profile, VenueIceOpenHours, VenueTrack, Reservation
 
 
 class RegisterUserForm(UserCreationForm):
@@ -89,3 +89,30 @@ class VenueTrackForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(VenueTrackForm, self).__init__(*args, **kwargs)
         self.fields['title'].widget.attrs['class'] = 'form-control'
+
+
+class AppendAttendeesToReservationForm(ModelForm):
+    # attendees = forms.ModelMultipleChoiceField(required=True, queryset=Reservation.creator)
+
+    class Meta:
+        model = Reservation
+        fields = ('attendees',)
+
+    def __init__(self, current_user_friendlist,*args, **kwargs):
+        super(AppendAttendeesToReservationForm, self).__init__(*args, **kwargs)
+        self.fields['attendees'].widget.attrs['class'] = 'form-control'
+        print("================")
+        test2 = []
+        print(list(current_user_friendlist))
+        test = list(current_user_friendlist)
+
+        for user in current_user_friendlist:
+            print("A")
+            print(user.profile)
+            test2.append(user.profile)
+
+        print(test2)
+
+        self.fields['attendees'].queryset = (self.fields['attendees'].queryset.
+                                             filter(profile_friends__in=test2))
+

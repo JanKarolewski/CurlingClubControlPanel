@@ -1,0 +1,16 @@
+{% extends 'events/base.html' %}
+{% block content %}
+
+
+<h4>Data Info</h4>
+{{ reservation_date }} <br>
+{{ reservation_from_hour }} <br>
+{{ reservation_to_hour }}
+<form action="{% url 'append-attendees-to-reservation' %}" method=POST>
+    {% csrf_token %}
+        {{ form }}
+
+    <br><button type="submit" value="Submit" class="btn btn-secondary">Zaktualizuj dane</button>
+</form>
+
+{% endblock %}

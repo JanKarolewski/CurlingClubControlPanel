@@ -21,38 +21,45 @@
     }
 </script>
 
-<h4>Profile Reservations</h4>
-<br/><br/><br/>
-<table class="table table-striped table-hover">
-    <thead>
-    <tr>
-        <th scope="col">Reserved for</th>
-        <th scope="col">Venue</th>
-        <th scope="col">Date</th>
-        <th scope="col">Status</th>
-        <th scope="col">Actions</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for reservation in reservations %}
-    <tr>
-        <td>
-            {% for attendee in reservation.attendees.all %}
-                ({{ forloop.counter }}) {{ attendee }}
-            {% endfor %}
-        </td>
-        <td>{{ reservation.venue }}</td>
-        <td>{{ reservation.reservation_date }}</td>
-        <td>{{ reservation.get_status_display }}</td>
-        <td>
-            <button type="submit" class="btn btn-outline-danger" onclick="changeReservationStatus( {{reservation.pk}}, 'cancel'); showLoader();" value="cacle_reservation" data-toggle="tooltip" data-placement="top" title="FILL DESCRIPTION">
-                {% bs_icon 'dash-circle' %}
-            </button>
-        </td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
-
+{% if reservations %}
+    <h4>Profile Reservations</h4>
+    <br/><br/><br/>
+    <table class="table table-striped table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Reserved for</th>
+            <th scope="col">Venue</th>
+            <th scope="col">Date</th>
+            <th scope="col">Status</th>
+            <th scope="col">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for reservation in reservations %}
+        <tr>
+            <td>
+                {% for attendee in reservation.attendees.all %}
+                    ({{ forloop.counter }}) {{ attendee }}
+                {% endfor %}
+            </td>
+            <td>{{ reservation.venue }}</td>
+            <td>{{ reservation.reservation_date }}</td>
+            <td>{{ reservation.get_status_display }}</td>
+            <td>
+                <button type="submit" class="btn btn-outline-danger" onclick="changeReservationStatus( {{reservation.pk}}, 'cancel'); showLoader();" value="cacle_reservation" data-toggle="tooltip" data-placement="top" title="FILL DESCRIPTION">
+                    {% bs_icon 'dash-circle' %}
+                </button>
+                <form style="display:inline-block;" action="{% url 'append-attendees-to-reservation' %}" method="GET">
+                    {% csrf_token %}
+                    <button type="submit" name="reservations_info" value="{{ reservation.pk }}" class="btn btn-primary">
+                        {% bs_icon 'people-fill' %}
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
 
 {% endblock %}
