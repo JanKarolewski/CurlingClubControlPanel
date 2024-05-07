@@ -1,0 +1,18 @@
+{% extends 'events/base.html' %}
+{% load bootstrap_icons %}
+{% block content %}
+
+
+<h4> {{ user.profile.club }} Import Members Panel</h4>
+
+<form action="{% url 'add-file-with-club-members' %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <p>
+        {{ form.file }}
+    </p>
+    <p>
+        <input type="submit" value="Upload"/>
+    </p>
+</form>
+
+{% endblock %}

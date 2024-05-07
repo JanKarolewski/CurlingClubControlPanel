@@ -48,6 +48,10 @@ class RegisterClubForm(ModelForm):
         self.fields['main_photo'].widget.attrs['class'] = 'form-control'
 
 
+class UploadFileWithMembersForm(forms.Form):
+    file = forms.FileField()
+
+
 class ProfileForm(ModelForm):
     club = forms.ModelChoiceField(queryset=Club.objects.all(), empty_label="wybierz klub")
     phone_number = PhoneNumberField()

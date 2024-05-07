@@ -11,6 +11,8 @@ urlpatterns = [
     path('club_info_panel/<int:club>', views.club_info_panel, name='club-info-panel'),
     path('club_admin_panel/<int:pk>', views.ClubView.as_view(), name='club-admin-panel'),
     path('club-members-reservation', views.ClubMembersReservation.as_view(), name='club-members-reservation'),
+    path('panel-for-import-members', views.panel_for_import_members, name='panel-for-import-members'),
+    path('add-file-with-club-members/', views.upload_file_with_members, name='add-file-with-club-members'),
 
     # venue (Ice Arena) administration
     path('venue_info_panel', views.venue_info_panel, name='venue-info-panel'),

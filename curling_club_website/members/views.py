@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.db.models import Q
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
@@ -20,7 +20,7 @@ from datetime import datetime
 
 from events.models import Venue
 from members.forms import RegisterUserForm, RegisterClubForm, ProfileForm, VenueIceOpenHoursForm, VenueTrackForm, \
-    AppendAttendeesToReservationForm
+    AppendAttendeesToReservationForm, UploadFileWithMembersForm
 from members.models import Profile, Club, VenueIceOpenHours, Reservation, VenueTrack, FriendRequest
 
 
@@ -159,6 +159,25 @@ def club_info_panel(request, club):
     else:
         all_clubs = Club.objects.all()
         return render(request, 'club/clubs_all_list.html', {'all_clubs': all_clubs})
+
+
+def panel_for_import_members(request):
+    return render(request, 'club/administration/panel_for_import_members.html')
+
+
+def upload_file_with_members(request):
+    if request.method == "POST":
+        form = UploadFileWithMembersForm(request.POST, request.FILES)
+        if form.is_valid():
+            # check for a model changes
+            # instance = ModelWithFileField(file_field=request.FILES["file"])
+            # instance.save()
+            form = request.FILES['file']
+            print(str(form))
+            return redirect('panel-for-import-members')
+    else:
+        form = UploadFileWithMembersForm()
+    return render(request, 'club/administration/panel_for_import_members.html', {"form": form})
 
 
 class ClubView(DetailView):
