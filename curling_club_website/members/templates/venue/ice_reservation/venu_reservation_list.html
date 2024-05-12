@@ -40,6 +40,7 @@
     <thead>
     <tr>
         <th scope="col">Created by</th>
+        <th scope="col">Title</th>
         <th scope="col">Reserved for</th>
         <th scope="col">Venue</th>
         <th scope="col">Date</th>
@@ -51,6 +52,7 @@
     {% for reservation in reservation_list %}
     <tr>
         <td>{{ reservation.creator }}</td>
+        <td>{{ reservation.title }}</td>
         <td>
             {% for attendee in reservation.attendees.all %}
                 ({{ forloop.counter }}) {{ attendee }}

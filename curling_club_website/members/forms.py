@@ -1,5 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.core.validators import FileExtensionValidator
 from django.forms import ModelForm
 from phonenumber_field.modelfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberPrefixWidget
@@ -49,7 +50,9 @@ class RegisterClubForm(ModelForm):
 
 
 class UploadFileWithMembersForm(forms.Form):
-    file = forms.FileField()
+    # file = forms.FileField()
+    # file = forms.FileField(validators=[FileExtensionValidator(['pdf', 'php', 'jpeg', 'jpg', 'png', 'txt'])])
+    file = forms.FileField(validators=[FileExtensionValidator(['jpeg'])])
 
 
 class ProfileForm(ModelForm):
@@ -105,18 +108,10 @@ class AppendAttendeesToReservationForm(ModelForm):
     def __init__(self, current_user_friendlist,*args, **kwargs):
         super(AppendAttendeesToReservationForm, self).__init__(*args, **kwargs)
         self.fields['attendees'].widget.attrs['class'] = 'form-control'
-        print("================")
-        test2 = []
-        print(list(current_user_friendlist))
+        check = []
         test = list(current_user_friendlist)
-
         for user in current_user_friendlist:
-            print("A")
-            print(user.profile)
-            test2.append(user.profile)
-
-        print(test2)
+            check.append(user.profile)
 
         self.fields['attendees'].queryset = (self.fields['attendees'].queryset.
-                                             filter(profile_friends__in=test2))
-
+                                             filter(profile_friends__in=check))

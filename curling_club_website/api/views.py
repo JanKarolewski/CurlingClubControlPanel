@@ -44,7 +44,6 @@ class ReservationForCustomerViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
     def get_queryset(self):
-        print("To jest to")
         venue = self.request.GET.get('venue', None)
         venue_info = Venue.objects.get(id=venue)
         self.queryset = self.queryset.filter(venue=venue_info)
@@ -351,7 +350,7 @@ class UpdateReservationStatus(APIView):
         reservation_id = request.data.get('reservationId', None)
         new_status = request.data.get('newStatus', None)
 
-        # 3-> cancle, 2-> accept, 4-> settle
+        # 3-> canceled, 2-> accept, 4-> settle
 
         reservation_object = self.get_object(reservation_id)
         if new_status:

@@ -172,9 +172,10 @@ def upload_file_with_members(request):
             # check for a model changes
             # instance = ModelWithFileField(file_field=request.FILES["file"])
             # instance.save()
-            form = request.FILES['file']
-            print(str(form))
-            return redirect('panel-for-import-members')
+            file = request.FILES['file']
+            print("Correct FILE!!!")
+        elif not form.is_valid():
+            print("wrong file")
     else:
         form = UploadFileWithMembersForm()
     return render(request, 'club/administration/panel_for_import_members.html', {"form": form})
