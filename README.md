@@ -1,1 +1,1 @@
-# magisterkav3
+# Praca Magisterska Fuzzing Django
