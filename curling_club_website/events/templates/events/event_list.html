@@ -19,10 +19,9 @@
     <p class="card-text">
     	<li> {{ event.manager }} </li>
 		<li> {{ event.description }} </li>
-		<li>
-		{% for user in  event.attendees.all %}
-			 {{ user }} ,
-		{% endfor %}
+            {% for user in  event.attendees.all %}
+                 {{ user }} ,
+            {% endfor %}
 		</li></p>
   </div>
 </div>

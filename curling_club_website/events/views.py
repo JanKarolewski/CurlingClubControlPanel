@@ -76,4 +76,4 @@ class AllPostsListView(ListView):
 
 class ArticleDetailView(DetailView):
     model = Post
-    template_name = 'post/detail-post_article.html'
+    template_name = 'post/detail_post_article.html'

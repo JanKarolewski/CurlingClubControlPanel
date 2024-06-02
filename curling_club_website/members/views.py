@@ -70,14 +70,15 @@ def register_user(request):
 @login_required
 def register_club(request):
     if request.method == 'POST':
-        form = RegisterClubForm(request.POST)
+        form = RegisterClubForm(data=request.POST, files=request.FILES)
+        data = form['main_photo']
         if form.is_valid():
             club = form.save(commit=False)
             club.club_admin = request.user
-            profile = Profile.objects.get(user=request.user)
+            form.save()
             try:
-                profile.club = form.instance
-                profile.save()
+                request.user.profile.club = club
+                request.user.profile.save()
                 messages.success(request, "Poprawna rejestracja klubu")
                 return redirect('home')
             except IntegrityError:
@@ -90,6 +91,23 @@ def register_club(request):
     return render(request, 'authenticate/register_club.html', {
         'form': form,
     })
+
+
+def update_club_data(request):
+    if request.user.is_authenticated:
+        club_data = Club.objects.get(id=request.user.profile.club.id)
+        form = RegisterClubForm(data=request.POST or None, files=request.FILES or None, instance=club_data)
+        if form.is_valid():
+            form.save()
+            print("formularz jest poprawny !!!")
+            messages.success(request, "Zaktualizowano dane klubu")
+            return redirect('home')
+        return render(request, 'authenticate/update_club_data.html', {
+            'form': form,
+        })
+    else:
+        messages.error(request, "Musisz być zalogowanym")
+        return redirect('home')
 
 
 @login_required
@@ -169,13 +187,10 @@ def upload_file_with_members(request):
     if request.method == "POST":
         form = UploadFileWithMembersForm(request.POST, request.FILES)
         if form.is_valid():
-            # check for a model changes
-            # instance = ModelWithFileField(file_field=request.FILES["file"])
-            # instance.save()
             file = request.FILES['file']
-            print("Correct FILE!!!")
+            # here is App Logic implemented
         elif not form.is_valid():
-            print("wrong file")
+            return redirect('club-members-panel')
     else:
         form = UploadFileWithMembersForm()
     return render(request, 'club/administration/panel_for_import_members.html', {"form": form})
@@ -190,8 +205,6 @@ class ClubView(DetailView):
     # permission_required = '(only_user_in_admin_club_group, only_my_club, only_login)' PermissionRequiredMixin
 
     # def get_context_data(self, *args, **kwargs):
-    #     if self.kwargs['pk'] != self.request.user.profile.club.id:
-    #         print("dupa")
     #     context = super(ClubView, self).get_context_data(*args, **kwargs)
     #     club_test = get_object_or_404(Club, id=self.kwargs['pk'])
     #     context["club_test"] = club_test
@@ -282,7 +295,7 @@ class VenueReservation(ListView):
     template_name = 'venue/ice_reservation/venu_reservation_list.html'
     date_from = None
     date_to = None
-    user_name_surname = "ddsfds"
+    user_name_surname = ""
     # todo create pagination
     # paginate_by = 30
 
@@ -314,7 +327,7 @@ class VenueReservation(ListView):
 
 
 def venue_info_panel(request):
-    #toDo for remplyee query
+    # toDo for remplyee query
     venue = Venue.objects.get(administrator=request.user)
     return render(request, 'venue/venue_control_panel.html', {
         'venue': venue
@@ -329,7 +342,8 @@ def venue_calendar_reservation_view(request):
 
 def edit_ice_availability_schedule(request, day_name):
     if request.user.is_authenticated:
-        venue_ice_open_hours = VenueIceOpenHours.objects.get(venue=request.user.profile.venue_employee, weekday=day_name)
+        venue_ice_open_hours = VenueIceOpenHours.objects.get(venue=request.user.profile.venue_employee,
+                                                             weekday=day_name)
         form = VenueIceOpenHoursForm(request.POST or None, instance=venue_ice_open_hours)
         if form.is_valid():
             form.save()
@@ -344,7 +358,8 @@ def edit_ice_availability_schedule(request, day_name):
 
 def delete_ice_availability_schedule(request, day_name):
     if request.user.is_authenticated:
-        venue_ice_open_hours = VenueIceOpenHours.objects.get(venue=request.user.profile.venue_employee, weekday=day_name)
+        venue_ice_open_hours = VenueIceOpenHours.objects.get(venue=request.user.profile.venue_employee,
+                                                             weekday=day_name)
         venue_ice_open_hours.delete()
         messages.success(request, "Wykreślono dane o dostępności lodu")
         return redirect('venue-calendar-reservation-view')
@@ -377,7 +392,7 @@ def create_ice_reservation_for_user(request, venue_id, day=datetime.now().day, m
 
 
 def create_ice_reservation(request, venue_id, day=datetime.now().day, month=datetime.now().month,
-                                    year=datetime.now().year):
+                           year=datetime.now().year):
     # /create-ice-reservation-for-user/?year:2028/month:5/
     venue = Venue.objects.get(id=venue_id)
     return render(request, 'venue/ice_reservation/create_ice_reservation.html',
@@ -494,12 +509,19 @@ def remove_from_friend_list(request):
 
 def append_attendees_to_reservation(request):
     reservations_info = request.GET.get('reservations_info', None)
-    reservation_data = Reservation.objects.get(id=reservations_info)
-    form = AppendAttendeesToReservationForm(instance=reservation_data, current_user_friendlist=reservation_data.creator_friends)
-    if form.is_valid():
-        form.save()
-        messages.success(request, "Zaktualizowano dane o uczetnikach rezerwacji")
-        return redirect('venue-tracks-view')
-    return render(request, 'authenticate/append_attendees_to_reservation.html',
-                  {'form': form, 'reservation_date': reservation_data.reservation_date,
-                   'reservation_from_hour': reservation_data.from_hour, 'reservation_to_hour': reservation_data.to_hour})
+    reservation_data = Reservation.objects.get(id=int(reservations_info))
+    form = AppendAttendeesToReservationForm(instance=reservation_data,
+                                            current_user_friendlist=reservation_data.creator_friends)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Zaktualizowano dane o uczetnikach rezerwacji")
+            return redirect('home')
+        else:
+            messages.error(request, "Błąd danych o uczetnikach rezerwacji")
+            return redirect('home')
+    else:
+        return render(request, 'authenticate/append_attendees_to_reservation.html',
+                      {'form': form, 'reservation_date': reservation_data.reservation_date,
+                       'reservation_from_hour': reservation_data.from_hour,
+                       'reservation_to_hour': reservation_data.to_hour})

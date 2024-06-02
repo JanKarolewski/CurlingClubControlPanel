@@ -4,8 +4,19 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
+import PIL
+from PIL import Image
+from rest_framework.exceptions import ValidationError
 
 from events.models import Venue
+
+
+#######################  VALIDATORS  #######################
+def validate_image(fielded_obj):
+    try:
+        img = Image.open(fielded_obj)
+    except PIL.UnidentifiedImageError:
+        raise ValidationError("Przesłany plik nie jest obrazem.")
 
 
 class Club(models.Model):
@@ -16,8 +27,8 @@ class Club(models.Model):
     facebook_page = models.URLField(max_length=255, null=True, blank=True)
     istagram_page = models.URLField(max_length=255, null=True, blank=True)
     phone_number = phone_number = PhoneNumberField()
-    main_photo = models.ImageField(blank=True, null=True, upload_to='clubs_main_photo/', default='uploads/OIP.jpg')
-    club_admin = models.OneToOneField(User, on_delete=models.PROTECT, default=None)
+    main_photo = models.ImageField(blank=True, null=True, upload_to='clubs_main_photo')
+    club_admin = models.OneToOneField(User, on_delete=models.PROTECT, default=None, related_name='club_admin')
     club_members = models.ManyToManyField(User, blank=True, null=True, related_name='club_members')
 
     # Todo create Adress model and add it to forms
@@ -38,7 +49,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     friends = models.ManyToManyField(User, related_name='profile_friends', blank=True)
     phone_number = PhoneNumberField(null=True, blank=True)
-    club = models.ForeignKey(Club, null=True, blank=True, on_delete=models.CASCADE)
+    club = models.ForeignKey(Club, null=True, blank=True, on_delete=models.SET_NULL)
     photo_profile = models.ImageField(blank=True, null=True, upload_to='user_photo_profile/', default='uploads/OIP.jpg')
     club_profile_status = models.CharField(choices=profile_status_choices, blank=True, null=True,
                                            default="No_club_member", max_length=100)

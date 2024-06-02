@@ -3,8 +3,7 @@
 
 
 <h4>Register Club</h4>
-<br/><br/><br/>
-<form action="{% url 'register-club' %}" method=POST>
+<form action="{% url 'register-club' %}" method=POST enctype="multipart/form-data">
     {% csrf_token %}
     {{ form }}
     <br><input type="submit" value="Submit" class="btn btn-secondary">

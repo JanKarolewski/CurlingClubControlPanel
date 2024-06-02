@@ -9,6 +9,7 @@ urlpatterns = [
     # club administration
     path('register_club', views.register_club, name='register-club'),
     path('club_info_panel/<int:club>', views.club_info_panel, name='club-info-panel'),
+    path('update_club_data', views.update_club_data, name='update-club-data'),
     path('club_admin_panel/<int:pk>', views.ClubView.as_view(), name='club-admin-panel'),
     path('club-members-reservation', views.ClubMembersReservation.as_view(), name='club-members-reservation'),
     path('panel-for-import-members', views.panel_for_import_members, name='panel-for-import-members'),

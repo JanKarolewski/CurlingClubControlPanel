@@ -50,9 +50,9 @@ class RegisterClubForm(ModelForm):
 
 
 class UploadFileWithMembersForm(forms.Form):
-    # file = forms.FileField()
+    file = forms.FileField(validators=[FileExtensionValidator(['xlsx'])])
     # file = forms.FileField(validators=[FileExtensionValidator(['pdf', 'php', 'jpeg', 'jpg', 'png', 'txt'])])
-    file = forms.FileField(validators=[FileExtensionValidator(['jpeg'])])
+    # file = forms.FileField(validators=[FileExtensionValidator(['jpeg'])])
 
 
 class ProfileForm(ModelForm):
@@ -105,13 +105,11 @@ class AppendAttendeesToReservationForm(ModelForm):
         model = Reservation
         fields = ('attendees',)
 
-    def __init__(self, current_user_friendlist,*args, **kwargs):
+    def __init__(self, current_user_friendlist, *args, **kwargs):
         super(AppendAttendeesToReservationForm, self).__init__(*args, **kwargs)
         self.fields['attendees'].widget.attrs['class'] = 'form-control'
         check = []
-        test = list(current_user_friendlist)
         for user in current_user_friendlist:
             check.append(user.profile)
-
         self.fields['attendees'].queryset = (self.fields['attendees'].queryset.
-                                             filter(profile_friends__in=check))
+                                             filter(profile__in=check))

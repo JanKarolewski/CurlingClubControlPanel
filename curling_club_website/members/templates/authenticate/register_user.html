@@ -2,13 +2,10 @@
 {% block content %}
 
 
- <h4>Register</h4>
-<br/><br/><br/>
-
-	<form action="{% url 'register-user' %}" method=POST>
-		{% csrf_token %}
-			{{ form }}
-
-        <br><input type="submit" value="Submit" class="btn btn-secondary">
-	</form>
+ <h4>Register User</h4>
+<form action="{% url 'register-user' %}" method=POST>
+	{% csrf_token %}
+		{{ form }}
+	<br><input type="submit" value="Submit" class="btn btn-secondary">
+</form>
 {% endblock %}

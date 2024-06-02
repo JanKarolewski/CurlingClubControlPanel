@@ -69,7 +69,6 @@ class ReservationForCustomerViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'])
     def reservation_for_calendar(self, request):
         # Get all club reservation for calendar in 2 cases (your reservation, or if admin venue all reservation)
-        print("nowy endpoint")
         out = []
         for reservation in self.get_queryset():
             out.append({
@@ -154,7 +153,6 @@ class ReservationViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'])
     def reservation_for_calendar(self, request):
         # Get all club reservation for calendar in 2 cases (your reservation, or if admin venue all reservation)
-        print("endpoint")
         out = []
         for reservation in self.get_queryset():
             out.append({
@@ -286,6 +284,11 @@ class VenueTrackViewSet(viewsets.ModelViewSet):
     serializer_class = VenueTrackSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
+
+    def get_queryset(self):
+        venue_Id = self.request.user.profile.venue_employee.id
+        self.queryset = self.queryset.filter(venue__exact=venue_Id)
+        return self.queryset
 
 
 class FilterForProfileViewSet(viewsets.ReadOnlyModelViewSet):
